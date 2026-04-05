@@ -16,18 +16,18 @@
 #include <stdexcept>
 #include <vector>
 
-class InstanceMS_CFLP_CI : public Instance {
+class InstanceMSCFLPCI : public Instance {
  public:
-  InstanceMS_CFLP_CI(
+  InstanceMSCFLPCI(
     const std::vector<short>&, 
     const std::vector<short>&,
     const std::vector<short>&, 
     const std::vector<std::vector<short>>&, 
     const std::vector<ShortPair>&);
-  ~InstanceMS_CFLP_CI() override;
+  ~InstanceMSCFLPCI() override;
 
   void setAlgorithm(const Algorithm*) override;
-  Solution* solve() override;
+  Solution* solve() const override;
 
   // getters
   const short getNumWarehouses() const;

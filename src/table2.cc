@@ -8,7 +8,7 @@ Table2::Table2(
  
 void Table2::displayOnConsole() const {
   std::cout << "Table 2: Supply Costs\n\n";
-  const InstanceMS_CFLP_CI* instance = dynamic_cast<const InstanceMS_CFLP_CI*>(instance_);
+  const InstanceMSCFLPCI* instance = dynamic_cast<const InstanceMSCFLPCI*>(instance_);
   if (instance == nullptr) throw std::invalid_argument("Invalid instance type. Table2::displayOnConsole");
   short num_stores = instance->getNumStores();
   short num_warehouses = instance->getNumWarehouses();

@@ -1,8 +1,8 @@
 #include "../include/solution-MS-CFLP-CI.h"
 #include "../include/instance-MS-CFLP-CI.h"
 
-SolutionMS_CFLP_CI::SolutionMS_CFLP_CI(
-  const InstanceMS_CFLP_CI* instance,
+SolutionMSCFLPCI::SolutionMSCFLPCI(
+  const InstanceMSCFLPCI* instance,
   const std::vector<short>& warehouse_assigned,
   const std::vector<std::vector<short>>& assignment,
   const std::vector<std::vector<float>>& good_supplied,
@@ -24,11 +24,11 @@ SolutionMS_CFLP_CI::SolutionMS_CFLP_CI(
     objective_value_ = o;
   }
 
-void SolutionMS_CFLP_CI::setTime(double time) {
+void SolutionMSCFLPCI::setTime(double time) {
   time_ = time;
 }
 
-float SolutionMS_CFLP_CI::fixedCostSumFunction() const {
+float SolutionMSCFLPCI::fixedCostSumFunction() const {
   const std::vector<short>& fixed_cost = instance_data_->getFixedCost();
 
   float fixed_cost_sum = 0.0;
@@ -36,7 +36,7 @@ float SolutionMS_CFLP_CI::fixedCostSumFunction() const {
   return fixed_cost_sum;
 }
 
-float SolutionMS_CFLP_CI::supplyCostSumFunction() const {
+float SolutionMSCFLPCI::supplyCostSumFunction() const {
   const short num_stores = instance_data_->getNumStores();
   const short num_assigned = getNumWarehousesAssigned();
   const std::vector<std::vector<short>>& supply_cost = instance_data_->getSupplyCost();
@@ -54,51 +54,51 @@ float SolutionMS_CFLP_CI::supplyCostSumFunction() const {
   return supply_cost_sum;
 }
 
-float SolutionMS_CFLP_CI::objectiveFunction() const {
+float SolutionMSCFLPCI::objectiveFunction() const {
   return fixedCostSumFunction() + supplyCostSumFunction();
 }
 
 // Getters
-const InstanceMS_CFLP_CI* SolutionMS_CFLP_CI::getInstanceData() const {
+const InstanceMSCFLPCI* SolutionMSCFLPCI::getInstanceData() const {
   return instance_data_;
 }
 
-const short SolutionMS_CFLP_CI::getNumWarehousesAssigned() const {
+const short SolutionMSCFLPCI::getNumWarehousesAssigned() const {
   return static_cast<short>(warehouse_assigned_.size());
 }
 
-const std::vector<short>& SolutionMS_CFLP_CI::getWarehouseAssigned() const {
+const std::vector<short>& SolutionMSCFLPCI::getWarehouseAssigned() const {
   return warehouse_assigned_;
 }
 
-const std::vector<std::vector<short>>& SolutionMS_CFLP_CI::getAssignment() const {
+const std::vector<std::vector<short>>& SolutionMSCFLPCI::getAssignment() const {
   return assignment_;
 }
 
-const std::vector<std::vector<float>>& SolutionMS_CFLP_CI::getGoodSupplied() const {
+const std::vector<std::vector<float>>& SolutionMSCFLPCI::getGoodSupplied() const {
   return good_supplied_;
 }
 
-const std::vector<short>& SolutionMS_CFLP_CI::getResidualCapacity() const {
+const std::vector<short>& SolutionMSCFLPCI::getResidualCapacity() const {
   return residual_capacity_;
 }
 
-const std::vector<short>& SolutionMS_CFLP_CI::getResidualGood() const {
+const std::vector<short>& SolutionMSCFLPCI::getResidualGood() const {
   return residual_good_;
 }
 
-const double& SolutionMS_CFLP_CI::getTime() const {
+const double& SolutionMSCFLPCI::getTime() const {
   return time_;
 }
 
-const float& SolutionMS_CFLP_CI::getFixedCostsSum() const {
+const float& SolutionMSCFLPCI::getFixedCostsSum() const {
   return fixed_costs_sum_;
 }
 
-const float& SolutionMS_CFLP_CI::getSupplyCostsSum() const {
+const float& SolutionMSCFLPCI::getSupplyCostsSum() const {
   return supply_costs_sum_;
 }
 
-const float& SolutionMS_CFLP_CI::getObjectiveValue() const {
+const float& SolutionMSCFLPCI::getObjectiveValue() const {
   return objective_value_;
 }

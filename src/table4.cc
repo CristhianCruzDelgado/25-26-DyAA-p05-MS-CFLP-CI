@@ -9,9 +9,9 @@ Table4::Table4(
  
 void Table4::displayOnConsole() const {
   std::cout << "Table 4: Fixed Costs\n";
-  const SolutionMS_CFLP_CI* solution = dynamic_cast<const SolutionMS_CFLP_CI*>(solution_);
+  const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table4::displayOnConsole");
-  const InstanceMS_CFLP_CI* instance = solution->getInstanceData();
+  const InstanceMSCFLPCI* instance = solution->getInstanceData();
   short num_warehouses = instance->getNumWarehouses();
   const std::vector<short>& warehouse_assigned = solution->getWarehouseAssigned();
   const std::vector<short>& fixed_cost = instance->getFixedCost();

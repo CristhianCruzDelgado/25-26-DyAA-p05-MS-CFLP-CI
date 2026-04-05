@@ -7,17 +7,15 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef INSTANCE_H_
-#define INSTANCE_H_
+#ifndef LOCAL_SEARCH_H_
+#define LOCAL_SEARCH_H_
 
-class Algorithm;
-class Solution;
+class SolutionMSCFLPCI;
 
-class Instance {
+class LocalSearch {
  public:
-  virtual ~Instance() = default;
-  virtual void setAlgorithm(const Algorithm*) = 0;
-  virtual Solution* solve() const = 0;
+  virtual ~LocalSearch() = default;
+  virtual SolutionMSCFLPCI* solve(SolutionMSCFLPCI*) const = 0;
 };
 
 #endif

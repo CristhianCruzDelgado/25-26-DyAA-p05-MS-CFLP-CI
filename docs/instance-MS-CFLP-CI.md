@@ -1,8 +1,8 @@
-# Documentation of class InstanceMS-CFPL-CI
+# Documentation of class InstanceMSCFPLCI
 
 ### Description
 
-The `class InstanceMS_CFLP_CI` represents all of the components of the **Multi-Supplier Capacitated Facility Location Problem with Client Incompatibilities (MS-CFLP-CI)**. It encapsulates a complete problem instance, storing all input data required to model warehouses, stores, supply costs, and pairwise store incompatibilities.
+The `class InstanceMSCFLPCI` represents all of the components of the **Multi-Supplier Capacitated Facility Location Problem with Client Incompatibilities (MS-CFLP-CI)**. It encapsulates a complete problem instance, storing all input data required to model warehouses, stores, supply costs, and pairwise store incompatibilities.
 
 ### Attributes
 

@@ -14,24 +14,24 @@
 
 #include <vector>
 
-class InstanceMS_CFLP_CI;
+class InstanceMSCFLPCI;
 
-class SolutionMS_CFLP_CI : public Solution {
+class SolutionMSCFLPCI : public Solution {
  public:
-  SolutionMS_CFLP_CI(
-    const InstanceMS_CFLP_CI*, 
+  SolutionMSCFLPCI(
+    const InstanceMSCFLPCI*, 
     const std::vector<short>&, 
     const std::vector<std::vector<short>>&, 
     const std::vector<std::vector<float>>&, 
     const std::vector<short>&, 
     const std::vector<short>&
   );
-  ~SolutionMS_CFLP_CI() override = default;
+  ~SolutionMSCFLPCI() override = default;
   void setTime(double) override;
   float objectiveFunction() const override;
 
   // getters
-  const InstanceMS_CFLP_CI* getInstanceData() const;
+  const InstanceMSCFLPCI* getInstanceData() const;
   const short getNumWarehousesAssigned() const;
   const std::vector<short>& getWarehouseAssigned() const;
   const std::vector<std::vector<short>>& getAssignment() const;
@@ -44,7 +44,7 @@ class SolutionMS_CFLP_CI : public Solution {
   const float& getObjectiveValue() const;
 
  private:
-  const InstanceMS_CFLP_CI* instance_data_;
+  const InstanceMSCFLPCI* instance_data_;
   std::vector<short> warehouse_assigned_;
   std::vector<std::vector<short>> assignment_;
   std::vector<std::vector<float>> good_supplied_;

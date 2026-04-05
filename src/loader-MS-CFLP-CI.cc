@@ -9,7 +9,7 @@ static inline std::string trim(const std::string& str) {
   return str.substr(first, last - first + 1);
 }
 
-Instance* LoaderMS_CFLP_CI::load(const char* path) const {
+Instance* LoaderMSCFLPCI::load(const char* path) const {
   std::ifstream file(path);
   if (!file) 
     throw std::runtime_error("Bad path " + std::string(path));
@@ -41,11 +41,11 @@ Instance* LoaderMS_CFLP_CI::load(const char* path) const {
     else if (field == "IncompatiblePairs") incompatible_pairs = readVectorPairsShort(value, incompatibilities);
   }
   
-  Instance* instance = new InstanceMS_CFLP_CI(capacity, fixed_cost, goods, supply_cost, incompatible_pairs);
+  Instance* instance = new InstanceMSCFLPCI(capacity, fixed_cost, goods, supply_cost, incompatible_pairs);
   return instance;
 }
 
-StringPair LoaderMS_CFLP_CI::readUntilSemicolon(std::ifstream& file, const std::string& firstLine) const {
+StringPair LoaderMSCFLPCI::readUntilSemicolon(std::ifstream& file, const std::string& firstLine) const {
   std::string assignment = firstLine;
   while (assignment.find(';') == std::string::npos) {
     std::string buffer;
@@ -59,7 +59,7 @@ StringPair LoaderMS_CFLP_CI::readUntilSemicolon(std::ifstream& file, const std::
   return { trim(field), trim(value) };
 }
 
-short LoaderMS_CFLP_CI::readShort(const std::string& value) const {
+short LoaderMSCFLPCI::readShort(const std::string& value) const {
   int number = std::stoi(value);
   if (number <= 0) 
     throw std::runtime_error("Invalid value (must be > 0): " + value);
@@ -68,7 +68,7 @@ short LoaderMS_CFLP_CI::readShort(const std::string& value) const {
   return static_cast<short>(number);
 }
 
-std::vector<short> LoaderMS_CFLP_CI::readVectorShort(const std::string& value, short size) const {
+std::vector<short> LoaderMSCFLPCI::readVectorShort(const std::string& value, short size) const {
   if (size <= 0) 
     throw std::runtime_error("Invalid size for vector: " + std::to_string(size));
   std::string cleaned = trim(value);
@@ -98,7 +98,7 @@ std::vector<short> LoaderMS_CFLP_CI::readVectorShort(const std::string& value, s
   return vector;
 }
 
-std::vector<std::vector<short>> LoaderMS_CFLP_CI::loadMatrix(std::ifstream& file, const std::string& firstLine, short rows, short cols) const {
+std::vector<std::vector<short>> LoaderMSCFLPCI::loadMatrix(std::ifstream& file, const std::string& firstLine, short rows, short cols) const {
   if (rows <= 0) 
     throw std::runtime_error("Invalid size for matrix: " + std::to_string(rows));
   std::vector<std::vector<short>> matrix;
@@ -143,7 +143,7 @@ std::vector<std::vector<short>> LoaderMS_CFLP_CI::loadMatrix(std::ifstream& file
   return matrix;
 }
 
-int LoaderMS_CFLP_CI::readInt(const std::string& value) const {
+int LoaderMSCFLPCI::readInt(const std::string& value) const {
   int number = std::stoi(value);
   if (number <= 0) 
     throw std::runtime_error("Invalid value (must be > 0): " + value);
@@ -152,7 +152,7 @@ int LoaderMS_CFLP_CI::readInt(const std::string& value) const {
   return number;
 }
 
-std::vector<ShortPair> LoaderMS_CFLP_CI::readVectorPairsShort(const std::string& value, int size) const {
+std::vector<ShortPair> LoaderMSCFLPCI::readVectorPairsShort(const std::string& value, int size) const {
   if (size <= 0) 
     throw std::runtime_error("Invalid size for pairs vector: " + std::to_string(size));
   std::string cleaned = trim(value);

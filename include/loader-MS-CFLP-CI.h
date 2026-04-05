@@ -24,9 +24,9 @@
 
 class Instance;
 
-class LoaderMS_CFLP_CI : public Loader {
+class LoaderMSCFLPCI : public Loader {
  public:
-  ~LoaderMS_CFLP_CI() override = default;
+  ~LoaderMSCFLPCI() override = default;
   Instance* load(const char*) const override;
 
  private:

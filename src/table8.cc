@@ -9,7 +9,7 @@ Table8::Table8(
  
 void Table8::displayOnConsole() const {
   std::cout << "Table 8: Objective Value\n";
-  const SolutionMS_CFLP_CI* solution = dynamic_cast<const SolutionMS_CFLP_CI*>(solution_);
+  const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table8::displayOnConsole");
  
   std::cout << BOLD << "\n"

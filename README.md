@@ -16,6 +16,16 @@ The objective of the MS-CFLP-CI is to minimize the sum of the fixed costs of ope
 
 See `docs/instance-MS-CFPL-CI.md`
 
+## Available instances
+
+See `./Instances_MS-CFLP-CI`. **Check if its need to unzip some instance**. Probably wlp[16..20].dzn are compressed.
+
+## Available algortihms
+
+> Greedy
+> GRASP (phase 1: construction, phase 2: local search) Local search movements: [shift, swap stores, swap warehouses and ban incompatibilities]
+
+
 ## Solution description
 
 See `docs/solution-MS-CFPL-CI.md`

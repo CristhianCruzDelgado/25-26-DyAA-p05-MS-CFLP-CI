@@ -1,8 +1,8 @@
-# Documentation of class SolutionMS-CFLP-CI
+# Documentation of class SolutionMSCFLPCI
 
 ### Description
 
-The `class SolutionMS_CFLP_CI` represents all of the components of the **Multi-Supplier Capacitated Facility Location Problem with Client Incompatibilities (MS-CFLP-CI)**. It encapsulates a complete problem solution, storing all output data generated to deciding which warehouses to open and how each store is assigned to them
+The `class SolutionMSCFLPCI` represents all of the components of the **Multi-Supplier Capacitated Facility Location Problem with Client Incompatibilities (MS-CFLP-CI)**. It encapsulates a complete problem solution, storing all output data generated to deciding which warehouses to open and how each store is assigned to them
 
 The goal of the MS-CFLP-CI is to minimize the total cost, which includes both the fixed costs of opening warehouses and supply costs between warehouses and clients. At the same time, the goods of every store must be fully satisfied, and all incompatibility constraints between clients must be respected
 

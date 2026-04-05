@@ -2,23 +2,23 @@
 #include "../include/instance-MS-CFLP-CI.h"
 #include "../include/solution-MS-CFLP-CI.h"
 
-AlgorithmGreedyMS_CFLP_CI::AlgorithmGreedyMS_CFLP_CI(
+AlgorithmGreedyMSCFLPCI::AlgorithmGreedyMSCFLPCI(
   const short& slack
 ) : 
   slack_(slack) {}
 
-Solution* AlgorithmGreedyMS_CFLP_CI::solve(const Instance* instance) const {
-  const InstanceMS_CFLP_CI* instance_MS_CFLP_CI = dynamic_cast<const InstanceMS_CFLP_CI*>(instance);
-  if (instance_MS_CFLP_CI == nullptr) throw std::invalid_argument("Invalid instance type");
+Solution* AlgorithmGreedyMSCFLPCI::solve(const Instance* instance) const {
+  const InstanceMSCFLPCI* instance_MSCFLPCI = dynamic_cast<const InstanceMSCFLPCI*>(instance);
+  if (instance_MSCFLPCI == nullptr) throw std::invalid_argument("Invalid instance type. AlgorithmGreedyMSCFLPCI::solve");
+
 
   // Phase 1: Warehouse selection
-  const short& num_warehouses = instance_MS_CFLP_CI->getNumWarehouses();
-  const short& num_stores = instance_MS_CFLP_CI->getNumStores();
-  const std::vector<short>& fixed_cost = instance_MS_CFLP_CI->getFixedCost();
-  const std::vector<short>& good = instance_MS_CFLP_CI->getGood();
-  const std::vector<short>& capacity = instance_MS_CFLP_CI->getCapacity();
+  const short& num_warehouses = instance_MSCFLPCI->getNumWarehouses();
+  const std::vector<short>& fixed_cost = instance_MSCFLPCI->getFixedCost();
+  const std::vector<short>& good = instance_MSCFLPCI->getGood();
+  const std::vector<short>& capacity = instance_MSCFLPCI->getCapacity();
   // 1
-  std::vector<short> sorted_fixed_cost_indices = sortFixedCostAscending(fixed_cost, num_warehouses); 
+  std::vector<short> sorted_fixed_cost_indices = AlgorithmTools::sortFixedCostAscending(fixed_cost, num_warehouses); 
   // 2
   short goods_sum = 0;
   for (short g : good) goods_sum += g;
@@ -47,9 +47,10 @@ Solution* AlgorithmGreedyMS_CFLP_CI::solve(const Instance* instance) const {
 
 
   // Phase 2: Store assignment
+  const short& num_stores = instance_MSCFLPCI->getNumStores();
   const short num_assigned = static_cast<short>(warehouse_assigned.size());
-  const std::vector<std::vector<short>>& supply_cost = instance_MS_CFLP_CI->getSupplyCost();
-  const std::vector<ShortPair>& incompatible_pairs = instance_MS_CFLP_CI->getIncompatiblePairs();
+  const std::vector<std::vector<short>>& supply_cost = instance_MSCFLPCI->getSupplyCost();
+  const std::vector<ShortPair>& incompatible_pairs = instance_MSCFLPCI->getIncompatiblePairs();
   // 11
   std::vector<short> residual_good = good;
   std::vector<short> residual_capacity(num_assigned);
@@ -62,15 +63,15 @@ Solution* AlgorithmGreedyMS_CFLP_CI::solve(const Instance* instance) const {
   // 14
   for(short i = 0; i < num_stores; ++i) {
     // 15
-    std::vector<short> sorted_store_supply_cost_indices = sortSupplyCostAscending(warehouse_assigned, num_assigned, supply_cost[i]);
+    std::vector<short> sorted_supply_cost_indices = AlgorithmTools::sortSupplyCostAscending(warehouse_assigned, num_assigned, supply_cost[i]);
     // 16
     short k = 0;
     while (residual_good[i] > 0 && k < num_assigned) {
       // 17
-      short j = sorted_store_supply_cost_indices[k];
+      short j = sorted_supply_cost_indices[k];
       // 18
       short store = i + 1;
-      if (verifyCompatibility(incompatible_pairs, store, assignment[j])) {
+      if (AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j])) {
         // 19
         short supply_amount = std::min(residual_good[i], residual_capacity[j]);
         if (supply_amount > 0) { 
@@ -95,44 +96,12 @@ Solution* AlgorithmGreedyMS_CFLP_CI::solve(const Instance* instance) const {
   // 26
   // float total_cost = calculateTotalCost();
   // 27
-  Solution* solution = new SolutionMS_CFLP_CI(
-    instance_MS_CFLP_CI, 
+  Solution* solution = new SolutionMSCFLPCI(
+    instance_MSCFLPCI, 
     std::move(warehouse_assigned),
     std::move(assignment), 
     std::move(good_supplied), 
     std::move(residual_capacity), 
     std::move(residual_good));
   return solution;
-}
-
-// Position i of the returned vector contains the index of the warehouse with the i-th lowest fixed cost
-std::vector<short> AlgorithmGreedyMS_CFLP_CI::sortFixedCostAscending(const std::vector<short>& v, const short& size) const {
-  std::vector<short> indices(size);
-  for (short i = 0; i < size; ++i)
-    indices[i] = i;
-  std::sort(indices.begin(), indices.end(), [&](short a, short b) {
-    return v[a] < v[b];
-  });
-  return indices;
-}
-
-// Position i of the returned vector contains the index of the warehouse with the i-th lowest supply cost for store i
-std::vector<short> AlgorithmGreedyMS_CFLP_CI::sortSupplyCostAscending(std::vector<short> warehouse_assigned, const short& size, const std::vector<short>& v) const {
-  std::vector<short> indices(size);
-  for (short i = 0; i < size; ++i)
-    indices[i] = i;
-  std::sort(indices.begin(), indices.end(), [&](short a, short b) {
-    return v[warehouse_assigned[a]] < v[warehouse_assigned[b]];
-  });
-  return indices;
-}
-
-bool AlgorithmGreedyMS_CFLP_CI::verifyCompatibility(const std::vector<ShortPair>& incompatible_pairs, const short& store, const std::vector<short>& assingments) const {
-  if (assingments.empty()) return true;
-  for (const ShortPair& pair : incompatible_pairs) 
-    if (pair.first == store) 
-      for (short assigned_store : assingments) 
-        if (assigned_store == pair.second) 
-          return false;
-  return true;
 }

@@ -9,9 +9,9 @@ Table7::Table7(
  
 void Table7::displayOnConsole() const {
   std::cout << "Table 7: Supply Costs\n";
-  const SolutionMS_CFLP_CI* solution = dynamic_cast<const SolutionMS_CFLP_CI*>(solution_);
+  const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table7::displayOnConsole");
-  const InstanceMS_CFLP_CI* instance = solution->getInstanceData();
+  const InstanceMSCFLPCI* instance = solution->getInstanceData();
   const short num_stores = instance->getNumStores();
   const short num_assigned = solution->getNumWarehousesAssigned();
   const std::vector<short>& good = instance->getGood();

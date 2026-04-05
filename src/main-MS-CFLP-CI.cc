@@ -11,6 +11,10 @@
 #include "../include/algorithm-greedy-MS-CFLP-CI.h"
 #include "../include/instance.h"
 #include "../include/loader-MS-CFLP-CI.h"
+#include "../include/local-search-ban-incompatibility.h"
+#include "../include/local-search-shift.h"
+#include "../include/local-search-swap-s.h"
+#include "../include/local-search-swap-w.h"
 #include "../include/solution.h"
 #include "../include/table1.h"
 #include "../include/table2.h"
@@ -25,17 +29,19 @@
 #include <stdexcept>
 #include <string>
 
-const char* HELP_MESSAGE = "\nHelp: This program decide which warehouses to open and how to assign stores. \
-                            \nTry: ./MS-CFLP-CI-solver                                  ~ Executable \
-                            \n../Instances_MS-CFLP-CI/wlp[1..20].dzn [--greedy|--grasp] ~ Run \
-                            \n[-h|--help]                                               ~ Help \
-                            \n[-v|--version]                                            ~ Version\n";
+const char* HELP_MESSAGE = "\nHelp: This program decide which warehouses to open and how to assign stores.\
+                            \nTry:                                                                       \
+                            \n./MS-CFLP-CI-solver                                                        \
+                            \n  [../Instances_MS-CFLP-CI/wlp[1..20].dzn                       ~ Run      \
+                            \n    [--greedy|--grasp [--shift|--swap-s|--swap-w|--ban-incompatibily] ] ]  \
+                            \n  [-h|--help]                                                   ~ Help     \
+                            \n  [-v|--version]                                                ~ Version\n";
 
-const char* VERSION = "MS-CFLP-CI Solver Version 1.0.0\n";
+const char* VERSION = "MS-CFLP-CI Solver Version 1.1.0\n";
 
-void solve_MS_CFLP_CI(const char*, const char&);
-void printInstanceMS_CFLP_CI(const Instance*);
-void printSolutionMS_CFLP_CI(const Solution*);
+void solveMSCFLPCI(const char*, const char&, const char&);
+void printInstanceMSCFLPCI(const Instance*);
+void printSolutionMSCFLPCI(const Solution*);
 
 int main(int argc, char* argv[]) {
   try {
@@ -51,9 +57,23 @@ int main(int argc, char* argv[]) {
       }
     } else if (argc == 3) {
       if (std::string(argv[2]) == "--greedy") {
-        solve_MS_CFLP_CI(argv[1], '1');
-      } else if (std::string(argv[2]) == "--grasp") {
-        solve_MS_CFLP_CI(argv[1], '2');
+        solveMSCFLPCI(argv[1], '1', '0');
+      } else {
+        throw std::invalid_argument("Invalid algorithm argument");
+      }
+    } else if (argc == 4) {
+      if (std::string(argv[2]) == "--grasp") {
+        if (std::string(argv[3]) == "--shift") {
+          solveMSCFLPCI(argv[1], '2', '1');
+        } else if (std::string(argv[3]) == "--swap-s") {
+          solveMSCFLPCI(argv[1], '2', '2');
+        } else if (std::string(argv[3]) == "--swap-w") {
+          solveMSCFLPCI(argv[1], '2', '3');
+        } else if (std::string(argv[3]) == "--ban-incompatibility") {
+          solveMSCFLPCI(argv[1], '2', '4');
+        } else {
+          throw std::invalid_argument("Invalid algorithm option argument");
+        }
       } else {
         throw std::invalid_argument("Invalid algorithm argument");
       }
@@ -70,16 +90,26 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-void solve_MS_CFLP_CI(const char* input_file, const char& mode) {
-  const LoaderMS_CFLP_CI* loader = new LoaderMS_CFLP_CI();
+void solveMSCFLPCI(const char* input_file, const char& mode, const char& options) {
+  const LoaderMSCFLPCI* loader = new LoaderMSCFLPCI();
   Instance* instance = loader->load(input_file);
-  printInstanceMS_CFLP_CI(instance);
+  printInstanceMSCFLPCI(instance);
   const Algorithm* algorithm = nullptr;
-  const short slack_for_incompatibilities = 5;
+  const short SLACK_FOR_COMPATIBILITY = 5;
+  const short GRASP_ITERATIONS = 30;
+  const short RCL_SIZE = 3;
+  const LocalSearch* local_search = nullptr;
   switch (mode) {
-    case '1': algorithm = new AlgorithmGreedyMS_CFLP_CI(slack_for_incompatibilities); break;
-    case '2': algorithm = new AlgorithmGRASPMS_CFLP_CI(); break;
-    // TODO: add case '3', case '4', ...
+    case '1': { algorithm = new AlgorithmGreedyMSCFLPCI(SLACK_FOR_COMPATIBILITY); break; }
+    case '2': {
+      switch (options) {
+        case '1': local_search = new LocalSearchShift(); break;
+        case '2': local_search = new LocalSearchSwapS(); break;
+        case '3': local_search = new LocalSearchSwapW(); break;
+        case '4': local_search = new LocalSearchBanIncompatibility(); break;
+      }
+      algorithm = new AlgorithmGraspMSCFLPCI(GRASP_ITERATIONS, RCL_SIZE, SLACK_FOR_COMPATIBILITY, local_search); break;
+    }
   }
   instance->setAlgorithm(algorithm);
   Timer* timer = new Timer();
@@ -87,7 +117,7 @@ void solve_MS_CFLP_CI(const char* input_file, const char& mode) {
   Solution* solution = instance->solve();
   timer->end();
   solution->setTime(timer->elapsed());
-  printSolutionMS_CFLP_CI(solution);
+  printSolutionMSCFLPCI(solution);
 
   delete loader;
   delete instance;
@@ -95,7 +125,7 @@ void solve_MS_CFLP_CI(const char* input_file, const char& mode) {
   delete solution;
 }
 
-void printInstanceMS_CFLP_CI(const Instance* instance) {
+void printInstanceMSCFLPCI(const Instance* instance) {
   Table* table = new Table1(instance);
   table->displayOnConsole();
   table = new Table2(instance);
@@ -108,7 +138,7 @@ void printInstanceMS_CFLP_CI(const Instance* instance) {
   std::cout << "\n\n - - - - - - - - - - \n";
 }
 
-void printSolutionMS_CFLP_CI(const Solution* solution) {
+void printSolutionMSCFLPCI(const Solution* solution) {
   std::cout << "\n - - - - - - - - - - \n\n";
 
   Table* table = new Table4(solution);
