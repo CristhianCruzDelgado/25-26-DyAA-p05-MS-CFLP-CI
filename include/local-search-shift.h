@@ -16,7 +16,7 @@
 class LocalSearchShift : public LocalSearch {
  public:
   ~LocalSearchShift() override = default;
-  SolutionMSCFLPCI* solve(SolutionMSCFLPCI*) const override;
+  SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const override;
 };
 
 #endif

@@ -19,42 +19,43 @@
  * The best feasible move across the entire neighborhood is applied per iteration.
  * The search terminates when no improving move exists in N(x).
  *
- * @param current_solution  The starting solution. Its data is copied; the
- *                          original is not modified.
- * @return A new locally optimal SolutionMSCFLPCI. The caller takes ownership.
+ * @param current_solution  The starting solution. The original is not modified.
+ * @return A new locally optimal SolutionMSCFLPCI.
  */
-SolutionMSCFLPCI* LocalSearchSwapS::solve(SolutionMSCFLPCI* current_solution) const {
-  const InstanceMSCFLPCI* instance = current_solution->getInstanceData();
-  const std::vector<short>& good = instance->getGood();
-  const std::vector<std::vector<short>>& supply_cost = instance->getSupplyCost();
-  const std::vector<ShortPair>& incompatible_pairs = instance->getIncompatiblePairs();
-  const short num_assigned = current_solution->getNumWarehousesAssigned();
-  std::vector<short> warehouse_assigned = current_solution->getWarehouseAssigned();
-  std::vector<std::vector<short>> assignment = current_solution->getAssignment();
-  std::vector<std::vector<float>> good_supplied = current_solution->getGoodSupplied();
-  std::vector<short> residual_capacity = current_solution->getResidualCapacity();
-  std::vector<short> residual_good = current_solution->getResidualGood();
+SolutionMSCFLPCI* LocalSearchSwapS::solve(const SolutionMSCFLPCI* current_solution) const {
+  const InstanceMSCFLPCI*                instance           = current_solution->getInstanceData();
+  const std::vector<short>&              good               = instance->getGood();
+  const std::vector<std::vector<short>>& supply_cost        = instance->getSupplyCost();
+  const std::vector<ShortPair>&          incompatible_pairs = instance->getIncompatiblePairs();
 
- bool improved = true;
+  const short                     num_assigned       = current_solution->getNumWarehousesAssigned();
+  std::vector<short>              warehouse_assigned = current_solution->getWarehouseAssigned();
+  std::vector<std::vector<short>> assignment         = current_solution->getAssignment();
+  std::vector<std::vector<float>> good_supplied      = current_solution->getGoodSupplied();
+  std::vector<short>              residual_capacity  = current_solution->getResidualCapacity();
+  std::vector<short>              residual_good      = current_solution->getResidualGood();
+
+  bool improved = true;
   while (improved) {
     improved = false;
 
-    float best_delta  = 0.0;
+    float best_delta  = 0.0f;
     short best_j1     = -1;
     short best_j2     = -1;
     short best_i1_idx = -1;
     short best_i2_idx = -1;
 
+    // upper triangular matrix for j_
     for (short j1 = 0; j1 < num_assigned; ++j1) {
-      for (short i1_idx = 0; i1_idx < assignment[j1].size(); ++i1_idx) {
-        const short store1 = assignment[j1][i1_idx];
-        const short i1 = store1 - 1;
+      for (short i1_idx = 0; i1_idx < (short)assignment[j1].size(); ++i1_idx) {
+        const short store1  = assignment[j1][i1_idx];
+        const short i1      = store1 - 1;
         const short amount1 = static_cast<short>(good_supplied[i1][j1] * good[i1]);
 
         for (short j2 = j1 + 1; j2 < num_assigned; ++j2) {
-          for (short i2_idx = 0; i2_idx < assignment[j2].size(); ++i2_idx) {
-            const short store2 = assignment[j2][i2_idx];
-            const short i2 = store2 - 1;
+          for (short i2_idx = 0; i2_idx < (short)assignment[j2].size(); ++i2_idx) {
+            const short store2  = assignment[j2][i2_idx];
+            const short i2      = store2 - 1;
             const short amount2 = static_cast<short>(good_supplied[i2][j2] * good[i2]);
 
             if (residual_capacity[j1] < amount2 - amount1) continue;
@@ -73,9 +74,10 @@ SolutionMSCFLPCI* LocalSearchSwapS::solve(SolutionMSCFLPCI* current_solution) co
               (supply_cost[i2][warehouse_assigned[j1]] - supply_cost[i2][warehouse_assigned[j2]]) * amount2;
 
             if (delta < best_delta) {
-              best_delta = delta;
-              best_j1 = j1;     
-              best_j2 = j2;
+              improved = true;
+              best_delta  = delta;
+              best_j1     = j1;     
+              best_j2     = j2;
               best_i1_idx = i1_idx; 
               best_i2_idx = i2_idx;
             }
@@ -84,24 +86,26 @@ SolutionMSCFLPCI* LocalSearchSwapS::solve(SolutionMSCFLPCI* current_solution) co
       }
     }
 
-    if (best_j1 != -1) {
+    if (improved) {
       const short store1  = assignment[best_j1][best_i1_idx];
       const short store2  = assignment[best_j2][best_i2_idx];
       const short i1      = store1 - 1;
       const short i2      = store2 - 1;
       const short amount1 = static_cast<short>(good_supplied[i1][best_j1] * good[i1]);
       const short amount2 = static_cast<short>(good_supplied[i2][best_j2] * good[i2]);
+
       assignment[best_j1].erase(assignment[best_j1].begin() + best_i1_idx);
       assignment[best_j2].erase(assignment[best_j2].begin() + best_i2_idx);
       assignment[best_j1].push_back(store2);
       assignment[best_j2].push_back(store1);
+
       good_supplied[i1][best_j2] += good_supplied[i1][best_j1];
-      good_supplied[i1][best_j1]  = 0.0;
+      good_supplied[i1][best_j1]  = 0.0f;
       good_supplied[i2][best_j1] += good_supplied[i2][best_j2];
-      good_supplied[i2][best_j2]  = 0.0;
+      good_supplied[i2][best_j2]  = 0.0f;
+
       residual_capacity[best_j1] += amount1 - amount2;
       residual_capacity[best_j2] += amount2 - amount1;
-      improved = true;
     }
   }
 
@@ -111,5 +115,6 @@ SolutionMSCFLPCI* LocalSearchSwapS::solve(SolutionMSCFLPCI* current_solution) co
     std::move(assignment),
     std::move(good_supplied),
     std::move(residual_capacity),
-    std::move(residual_good));
+    std::move(residual_good)
+  );
 }

@@ -15,7 +15,7 @@ class SolutionMSCFLPCI;
 class LocalSearch {
  public:
   virtual ~LocalSearch() = default;
-  virtual SolutionMSCFLPCI* solve(SolutionMSCFLPCI*) const = 0;
+  virtual SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const = 0;
 };
 
 #endif

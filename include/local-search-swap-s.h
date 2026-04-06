@@ -16,7 +16,7 @@
 class LocalSearchSwapS : public LocalSearch {
  public:
   ~LocalSearchSwapS() override = default;
-  SolutionMSCFLPCI* solve(SolutionMSCFLPCI*) const override;
+  SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const override;
 };
 
 #endif

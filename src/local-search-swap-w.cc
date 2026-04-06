@@ -20,108 +20,119 @@
  * The best feasible move across the entire neighborhood is applied per iteration.
  * The search terminates when no improving move exists in N(x).
  *
- * @param current_solution  The starting solution. Its data is copied; the
- *                          original is not modified.
- * @return A new locally optimal SolutionMSCFLPCI. The caller takes ownership.
+ * @param current_solution  The starting solution. The original is not modified.
+ * @return A new locally optimal SolutionMSCFLPCI.
  */
-SolutionMSCFLPCI* LocalSearchSwapW::solve(SolutionMSCFLPCI* current_solution) const {
-  const InstanceMSCFLPCI* instance = current_solution->getInstanceData();
-  const short num_warehouses = instance->getNumWarehouses();
-  const std::vector<short>& good = instance->getGood();
-  const std::vector<short>& capacity = instance->getCapacity();
-  const std::vector<short>& fixed_cost = instance->getFixedCost();
-  const std::vector<std::vector<short>>& supply_cost = instance->getSupplyCost();
-  const std::vector<ShortPair>& incompatible_pairs = instance->getIncompatiblePairs();
-  const short num_assigned = current_solution->getNumWarehousesAssigned();
-  std::vector<short> warehouse_assigned = current_solution->getWarehouseAssigned();
-  std::vector<std::vector<short>> assignment = current_solution->getAssignment();
-  std::vector<std::vector<float>> good_supplied = current_solution->getGoodSupplied();
-  std::vector<short> residual_capacity = current_solution->getResidualCapacity();
-  std::vector<short> residual_good = current_solution->getResidualGood();
+SolutionMSCFLPCI* LocalSearchSwapW::solve(const SolutionMSCFLPCI* current_solution) const {
+  const InstanceMSCFLPCI*                instance           = current_solution->getInstanceData();
+  const short                            num_warehouses     = instance->getNumWarehouses();
+  const std::vector<short>&              good               = instance->getGood();
+  const std::vector<short>&              capacity           = instance->getCapacity();
+  const std::vector<short>&              fixed_cost         = instance->getFixedCost();
+  const std::vector<std::vector<short>>& supply_cost        = instance->getSupplyCost();
+  const std::vector<ShortPair>&          incompatible_pairs = instance->getIncompatiblePairs();
+
+  const short                     num_assigned       = current_solution->getNumWarehousesAssigned();
+  std::vector<short>              warehouse_assigned = current_solution->getWarehouseAssigned();
+  std::vector<std::vector<short>> assignment         = current_solution->getAssignment();
+  std::vector<std::vector<float>> good_supplied      = current_solution->getGoodSupplied();
+  std::vector<short>              residual_capacity  = current_solution->getResidualCapacity();
+  std::vector<short>              residual_good      = current_solution->getResidualGood();
 
   bool improved = true;
   while (improved) {
     improved = false;
 
-    float best_delta = 0.0;
-    short best_j1 = -1;
+    float best_delta   = 0.0f;
+    short best_j1      = -1;
     short best_j_close = -1;
-    std::vector<short> best_residual_capacity;
-    std::vector<std::vector<short>> best_assignment;
-    std::vector<std::vector<float>> best_good_supplied;
 
     for (short j1 = 0; j1 < num_assigned; ++j1) {
-      const short w_open = warehouse_assigned[j1];
+      const short j_open = warehouse_assigned[j1];
 
       for (short j_close = 0; j_close < num_warehouses; ++j_close) {
         if (std::find(warehouse_assigned.begin(), warehouse_assigned.end(), j_close) != warehouse_assigned.end()) continue;
 
-        std::vector<short> sim_residual_capacity = residual_capacity;
-        std::vector<std::vector<short>> sim_assignment = assignment;
-        std::vector<std::vector<float>> sim_good_supplied = good_supplied;
-        sim_residual_capacity[j1] = 0;
-
-        short j_close_residual = capacity[j_close];
+        short              j_close_residual = capacity[j_close];
         std::vector<short> j_close_assigned;
+        bool               feasible         = true;
+        float              delta_supply     = 0.0f;
 
-        bool feasible = true;
-        float delta_supply = 0.0;
-
-        for (short s_idx = 0; s_idx < assignment[j1].size() && feasible; ++s_idx) {
-          const short store = assignment[j1][s_idx];
-          const short i = store - 1;
+        for (short s_idx = 0; s_idx < (short)assignment[j1].size() && feasible; ++s_idx) {
+          const short store  = assignment[j1][s_idx];
+          const short i      = store - 1;
           const short amount = static_cast<short>(good_supplied[i][j1] * good[i]);
-          bool assigned = false;
+          bool        assigned = false;
 
+          // Try j_close first
           if (j_close_residual >= amount && AlgorithmTools::verifyCompatibility(incompatible_pairs, store, j_close_assigned)) {
             j_close_residual -= amount;
             j_close_assigned.push_back(store);
-            delta_supply += (supply_cost[i][j_close] - supply_cost[i][w_open]) * amount;
-            sim_good_supplied[i][j1] = 0.0;
-            sim_good_supplied[i][j1] = static_cast<float>(amount) / good[i];
-            sim_assignment[j1].push_back(store);
+            delta_supply += (supply_cost[i][j_close] - supply_cost[i][j_open]) * amount;
             assigned = true;
           }
 
-          if (!assigned) {
-            for (short j2 = 0; j2 < num_assigned && !assigned; ++j2) {
-              if (j2 == j1) continue;
-              const short w_b = warehouse_assigned[j2];
-              std::vector<short> j2_without_store;
-              for (short x : sim_assignment[j2]) if (x != store) j2_without_store.push_back(x);
-              if (sim_residual_capacity[j2] >= amount &&
-                  AlgorithmTools::verifyCompatibility(incompatible_pairs, store, j2_without_store)) {
-                sim_residual_capacity[j2] -= amount;
-                delta_supply += (supply_cost[i][w_b] - supply_cost[i][w_open]) * amount;
-                sim_good_supplied[i][j2] += good_supplied[i][j1];
-                sim_good_supplied[i][j1]  = 0.0f;
-                sim_assignment[j2].push_back(store);
-                sim_assignment[j1].erase(std::find(sim_assignment[j1].begin(), sim_assignment[j1].end(), store));
-                assigned = true;
-              }
+          if (assigned) continue;
+
+          // Fallback: try other open warehouses
+          for (short j2 = 0; j2 < num_assigned; ++j2) {
+            if (j2 == j1) continue;
+            if (residual_capacity[j2] >= amount && AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j2])) {
+              delta_supply += (supply_cost[i][warehouse_assigned[j2]] - supply_cost[i][j_open]) * amount;
+              assigned = true;
+              break;
             }
           }
-          if (!assigned) feasible = false;
+
+          if (assigned) continue;
+          else  feasible = false;
         }
+
         if (!feasible) continue;
-        const float delta = (fixed_cost[j_close] - fixed_cost[w_open]) + delta_supply;
+
+        const float delta = (fixed_cost[j_close] - fixed_cost[j_open]) + delta_supply;
         if (delta < best_delta) {
-          best_delta = delta;
-          best_j1 = j1;
+          improved = true;
+          best_delta   = delta;
+          best_j1      = j1;
           best_j_close = j_close;
-          sim_residual_capacity[j1] = j_close_residual;
-          best_residual_capacity = sim_residual_capacity;
-          best_assignment = sim_assignment;
-          best_good_supplied = sim_good_supplied;
         }
       }
     }
-    if (best_j1 != -1) {
+
+    if (improved) {
+      const short        j_open         = warehouse_assigned[best_j1];
+      short              j_close_residual = capacity[best_j_close];
+      std::vector<short> j_close_assigned;
+      std::vector<short> stores_for_j_close;
+
+      for (short store : assignment[best_j1]) {
+        const short i      = store - 1;
+        const short amount = static_cast<short>(good_supplied[i][best_j1] * good[i]);
+
+        if (j_close_residual >= amount && AlgorithmTools::verifyCompatibility(incompatible_pairs, store, j_close_assigned)) {
+          j_close_residual -= amount;
+          j_close_assigned.push_back(store);
+          stores_for_j_close.push_back(store);
+          good_supplied[i][best_j1] = static_cast<float>(amount) / good[i];
+          continue;
+        }
+
+        for (short j2 = 0; j2 < num_assigned; ++j2) {
+          if (j2 == best_j1) continue;
+          if (residual_capacity[j2] >= amount && AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j2])) {
+            good_supplied[i][j2]      += good_supplied[i][best_j1];
+            good_supplied[i][best_j1]  = 0.0f;
+            residual_capacity[j2]     -= amount;
+            assignment[j2].push_back(store);
+            break;
+          }
+        }
+      }
+
+      assignment[best_j1]         = stores_for_j_close;
+      residual_capacity[best_j1]  = j_close_residual;
       warehouse_assigned[best_j1] = best_j_close;
-      residual_capacity = best_residual_capacity;
-      assignment = best_assignment;
-      good_supplied = best_good_supplied;
-      improved = true;
     }
   }
 
@@ -131,5 +142,6 @@ SolutionMSCFLPCI* LocalSearchSwapW::solve(SolutionMSCFLPCI* current_solution) co
     std::move(assignment),
     std::move(good_supplied),
     std::move(residual_capacity),
-    std::move(residual_good));
+    std::move(residual_good)
+  );
 }

@@ -16,7 +16,7 @@
 class LocalSearchBanIncompatibility : public LocalSearch {
  public:
   ~LocalSearchBanIncompatibility() override = default;
-  SolutionMSCFLPCI* solve(SolutionMSCFLPCI*) const override;
+  SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const override;
 };
 
 #endif

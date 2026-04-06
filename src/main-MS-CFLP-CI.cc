@@ -29,13 +29,14 @@
 #include <stdexcept>
 #include <string>
 
-const char* HELP_MESSAGE = "\nHelp: This program decide which warehouses to open and how to assign stores.\
-                            \nTry:                                                                       \
-                            \n./MS-CFLP-CI-solver                                                        \
-                            \n  [../Instances_MS-CFLP-CI/wlp[1..20].dzn                       ~ Run      \
-                            \n    [--greedy|--grasp [--shift|--swap-s|--swap-w|--ban-incompatibily] ] ]  \
-                            \n  [-h|--help]                                                   ~ Help     \
-                            \n  [-v|--version]                                                ~ Version\n";
+const char* HELP_MESSAGE = "\nHelp: This program decide which warehouses to open\
+and how to assign stores.\
+\nTry:\
+\n./MS-CFLP-CI-solver\
+\n    [../Instances_MS-CFLP-CI/wlp[1..20].dzn ~ Run\
+\n        [--greedy|--grasp [--shift|--swap-s|--swap-w|--ban-incompatibilities]]]\
+\n    [-h|--help]                             ~ Help\
+\n    [-v|--version]                          ~ Version\n";
 
 const char* VERSION = "MS-CFLP-CI Solver Version 1.1.0\n";
 
