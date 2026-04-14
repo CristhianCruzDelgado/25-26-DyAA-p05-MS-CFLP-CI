@@ -45,18 +45,18 @@ SolutionMSCFLPCI* LocalSearchSwapS::solve(const SolutionMSCFLPCI* current_soluti
     short best_i1_idx = -1;
     short best_i2_idx = -1;
 
-    // upper triangular matrix for j_
+    // upper triangular matrix for `j`
     for (short j1 = 0; j1 < num_assigned; ++j1) {
       for (short i1_idx = 0; i1_idx < (short)assignment[j1].size(); ++i1_idx) {
         const short store1  = assignment[j1][i1_idx];
         const short i1      = store1 - 1;
-        const short amount1 = static_cast<short>(good_supplied[i1][j1] * good[i1]);
+        const short amount1 = static_cast<short>(good_supplied[i1][j1] * good[i1]); // amount supplied by `j1` to `i1`
 
         for (short j2 = j1 + 1; j2 < num_assigned; ++j2) {
           for (short i2_idx = 0; i2_idx < (short)assignment[j2].size(); ++i2_idx) {
             const short store2  = assignment[j2][i2_idx];
             const short i2      = store2 - 1;
-            const short amount2 = static_cast<short>(good_supplied[i2][j2] * good[i2]);
+            const short amount2 = static_cast<short>(good_supplied[i2][j2] * good[i2]); // amount supplied by `j2`to `i2`
 
             if (residual_capacity[j1] < amount2 - amount1) continue;
             if (residual_capacity[j2] < amount1 - amount2) continue;
@@ -72,7 +72,6 @@ SolutionMSCFLPCI* LocalSearchSwapS::solve(const SolutionMSCFLPCI* current_soluti
             const float delta =
               (supply_cost[i1][warehouse_assigned[j2]] - supply_cost[i1][warehouse_assigned[j1]]) * amount1 +
               (supply_cost[i2][warehouse_assigned[j1]] - supply_cost[i2][warehouse_assigned[j2]]) * amount2;
-
             if (delta < best_delta) {
               improved = true;
               best_delta  = delta;
@@ -91,8 +90,8 @@ SolutionMSCFLPCI* LocalSearchSwapS::solve(const SolutionMSCFLPCI* current_soluti
       const short store2  = assignment[best_j2][best_i2_idx];
       const short i1      = store1 - 1;
       const short i2      = store2 - 1;
-      const short amount1 = static_cast<short>(good_supplied[i1][best_j1] * good[i1]);
-      const short amount2 = static_cast<short>(good_supplied[i2][best_j2] * good[i2]);
+      const short amount1 = static_cast<short>(good_supplied[i1][best_j1] * good[i1]); // amount supplied by `j1`
+      const short amount2 = static_cast<short>(good_supplied[i2][best_j2] * good[i2]); // amount supplied by `j2`
 
       assignment[best_j1].erase(assignment[best_j1].begin() + best_i1_idx);
       assignment[best_j2].erase(assignment[best_j2].begin() + best_i2_idx);

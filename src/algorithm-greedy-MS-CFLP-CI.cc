@@ -11,7 +11,6 @@ Solution* AlgorithmGreedyMSCFLPCI::solve(const Instance* instance) const {
   const InstanceMSCFLPCI* instance_MSCFLPCI = dynamic_cast<const InstanceMSCFLPCI*>(instance);
   if (instance_MSCFLPCI == nullptr) throw std::invalid_argument("Invalid instance type. AlgorithmGreedyMSCFLPCI::solve");
 
-
   // Phase 1: Warehouse selection
   const short& num_warehouses = instance_MSCFLPCI->getNumWarehouses();
   const std::vector<short>& fixed_cost = instance_MSCFLPCI->getFixedCost();
@@ -42,9 +41,6 @@ Solution* AlgorithmGreedyMSCFLPCI::solve(const Instance* instance) const {
     extra_warehouses.push_back(sorted_fixed_cost_indices[j]);
   // 10
   for (short e : extra_warehouses) warehouse_assigned.push_back(e);
-
-
-
 
   // Phase 2: Store assignment
   const short& num_stores = instance_MSCFLPCI->getNumStores();
@@ -102,6 +98,7 @@ Solution* AlgorithmGreedyMSCFLPCI::solve(const Instance* instance) const {
     std::move(assignment), 
     std::move(good_supplied), 
     std::move(residual_capacity), 
-    std::move(residual_good));
+    std::move(residual_good)
+  );
   return solution;
 }

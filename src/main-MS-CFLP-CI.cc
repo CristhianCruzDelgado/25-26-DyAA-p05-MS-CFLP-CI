@@ -34,7 +34,7 @@ and how to assign stores.\
 \nTry:\
 \n./MS-CFLP-CI-solver\
 \n    [../Instances_MS-CFLP-CI/wlp[1..20].dzn ~ Run\
-\n        [--greedy|--grasp [--shift|--swap-s|--swap-w|--ban-incompatibilities]]]\
+\n        [--greedy|--grasp [--shift|--swap-s|--swap-w|--ban-incompatibility]]]\
 \n    [-h|--help]                             ~ Help\
 \n    [-v|--version]                          ~ Version\n";
 
@@ -96,10 +96,14 @@ void solveMSCFLPCI(const char* input_file, const char& mode, const char& options
   Instance* instance = loader->load(input_file);
   printInstanceMSCFLPCI(instance);
   const Algorithm* algorithm = nullptr;
-  const short SLACK_FOR_COMPATIBILITY = 5;
-  const short GRASP_ITERATIONS = 30;
-  const short RCL_SIZE = 3;
   const LocalSearch* local_search = nullptr;
+
+
+  const short SLACK_FOR_COMPATIBILITY = 5;
+  const short GRASP_ITERATIONS = 50;
+  const short RCL_SIZE = 3;
+
+
   switch (mode) {
     case '1': { algorithm = new AlgorithmGreedyMSCFLPCI(SLACK_FOR_COMPATIBILITY); break; }
     case '2': {

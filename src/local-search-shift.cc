@@ -50,9 +50,8 @@ SolutionMSCFLPCI* LocalSearchShift::solve(const SolutionMSCFLPCI* current_soluti
     for (short i = 0; i < num_stores; ++i) {
       const short store = i + 1;
       for (short j1 = 0; j1 < num_assigned; ++j1) {
-        const auto it = std::find(assignment[j1].begin(), assignment[j1].end(), store);
-        if (it == assignment[j1].end()) continue;
-        const short amount = static_cast<short>(good_supplied[i][j1] * good[i]);
+        if (std::find(assignment[j1].begin(), assignment[j1].end(), store) == assignment[j1].end()) continue; 
+        const short amount = static_cast<short>(good_supplied[i][j1] * good[i]); // amount supplied by `j1`
         for (short j2 = 0; j2 < num_assigned; ++j2) {
           if (j1 == j2) continue;
           if (residual_capacity[j2] == 0) continue;
@@ -74,13 +73,12 @@ SolutionMSCFLPCI* LocalSearchShift::solve(const SolutionMSCFLPCI* current_soluti
 
     if (improved) {
       const short store        = best_i + 1;
-      const short full_amount  = static_cast<short>(good_supplied[best_i][best_j1] * good[best_i]);
+      const short full_amount  = static_cast<short>(good_supplied[best_i][best_j1] * good[best_i]); // amount supplied by `j1`
       const float fraction     = static_cast<float>(best_amount) / good[best_i];
 
       if (best_amount == full_amount) {
         // Full shift: remove store from j1
-        auto it = std::find(assignment[best_j1].begin(), assignment[best_j1].end(), store);
-        assignment[best_j1].erase(it);
+        assignment[best_j1].erase(std::find(assignment[best_j1].begin(), assignment[best_j1].end(), store));
         good_supplied[best_i][best_j1] = 0.0f;
       } else {
         // Partial shift: reduce fraction in j1

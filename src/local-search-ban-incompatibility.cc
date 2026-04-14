@@ -42,14 +42,14 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
   while (improved) {
     improved = false;
 
-    short worst_j   = -1;
+    short worst_j           = -1;
     float worst_supply_cost = -1.0f;
 
     for (short j1 = 0; j1 < num_assigned; ++j1) {
       float total = 0.0f;
       for (short store : assignment[j1]) {
         const short i      = store - 1;
-        const short amount = static_cast<short>(good_supplied[i][j1] * good[i]);
+        const short amount = static_cast<short>(good_supplied[i][j1] * good[i]); // amount supplied by `j1` to `i`
         total += supply_cost[i][warehouse_assigned[j1]] * amount;
       }
       if (total > worst_supply_cost) {
@@ -82,9 +82,11 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
 
     if (block_i == -1) continue;
 
-    const short amount      = static_cast<short>(good_supplied[block_i][worst_j] * good[block_i]);
-    float       best_delta  = 0.0f;
-    short       best_j2     = -1;
+    // worst_j found and block_i found
+
+    const short amount     = static_cast<short>(good_supplied[block_i][worst_j] * good[block_i]);  // amount supplied by `j1` to `i`
+    float       best_delta = 0.0f;
+    short       best_j2    = -1;
 
     for (short j2 = 0; j2 < num_assigned; ++j2) {
       if (j2 == worst_j) continue;

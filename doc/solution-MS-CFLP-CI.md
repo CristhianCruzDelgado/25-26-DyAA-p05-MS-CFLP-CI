@@ -44,16 +44,16 @@ Atendiendo al enunciado de la práctica ...
 Aunque se dispondrán de varias tablas para representar la solución esta será la que medirá el valor objetivo final. En función de ella se puede medir la calidad de cada solución ofrecida por los distintos algoritmos que generan las distintas soluciones.
 
 Tabla 9: Resultados
-| Instancia | m     | n     | Greedy (value, time) | GRASP  (value, time) |
-|-----------|-------|-------|----------------------|----------------------|
-| wlp01     | 50    | 115   |    37004, ~0.0025    |           ?          |
-| wlp02     | 100   | 253   |    70313, ~0.03      |           ?          |        
-| wlp03     | 150   | 345   |    86477, ~0.07      |           ?          |
-| wlp04     | 200   | 479   |   103105, ~0.15      |           ?          |
-| wlp05     | 250   | 601   |   129380, ~0.4       |           ?          |
-| wlp06     | 300   | 705   |   151083, ~0.8       |           ?          | 
-| wlp07     | 400   | 1012  |   213769, ~2.5       |           ?          | 
-| wlp08     | 500   | 1277  |   248919, ~4.8       |           ?          | 
+| Instancia | m     | n     | Greedy (value, time) |
+|-----------|-------|-------|----------------------|
+| wlp01     | 50    | 115   |    37004, ~0.0025    |
+| wlp02     | 100   | 253   |    70313, ~0.03      |        
+| wlp03     | 150   | 345   |    86477, ~0.07      |
+| wlp04     | 200   | 479   |   103105, ~0.15      |
+| wlp05     | 250   | 601   |   129380, ~0.4       |
+| wlp06     | 300   | 705   |   151083, ~0.8       | 
+| wlp07     | 400   | 1012  |   213769, ~2.5       | 
+| wlp08     | 500   | 1277  |   248919, ~4.8       | 
 | wlp09     | 600   | 1483  |    
 | wlp10     | 700   | 1733  |    
 | wlp11     | 800   | 2020  |    

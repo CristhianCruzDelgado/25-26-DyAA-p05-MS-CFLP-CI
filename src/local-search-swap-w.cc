@@ -61,23 +61,24 @@ SolutionMSCFLPCI* LocalSearchSwapW::solve(const SolutionMSCFLPCI* current_soluti
         for (short s_idx = 0; s_idx < (short)assignment[j1].size() && feasible; ++s_idx) {
           const short store  = assignment[j1][s_idx];
           const short i      = store - 1;
-          const short amount = static_cast<short>(good_supplied[i][j1] * good[i]);
+          const short amount = static_cast<short>(good_supplied[i][j1] * good[i]); // amount supplied by `j1` to `i`
           bool        assigned = false;
 
           // Try j_close first
-          if (j_close_residual >= amount && AlgorithmTools::verifyCompatibility(incompatible_pairs, store, j_close_assigned)) {
-            j_close_residual -= amount;
-            j_close_assigned.push_back(store);
-            delta_supply += (supply_cost[i][j_close] - supply_cost[i][j_open]) * amount;
-            assigned = true;
+          if (j_close_residual >= amount) {
+            if (AlgorithmTools::verifyCompatibility(incompatible_pairs, store, j_close_assigned)) {
+              j_close_residual -= amount;
+              j_close_assigned.push_back(store);
+              delta_supply += (supply_cost[i][j_close] - supply_cost[i][j_open]) * amount;
+              continue;
+            }
           }
 
-          if (assigned) continue;
-
-          // Fallback: try other open warehouses
+          // Try other j_open
           for (short j2 = 0; j2 < num_assigned; ++j2) {
             if (j2 == j1) continue;
-            if (residual_capacity[j2] >= amount && AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j2])) {
+            if (residual_capacity[j2] >= amount) {
+              if (!AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j2])) continue;
               delta_supply += (supply_cost[i][warehouse_assigned[j2]] - supply_cost[i][j_open]) * amount;
               assigned = true;
               break;
@@ -85,9 +86,8 @@ SolutionMSCFLPCI* LocalSearchSwapW::solve(const SolutionMSCFLPCI* current_soluti
           }
 
           if (assigned) continue;
-          else  feasible = false;
+          else feasible = false;
         }
-
         if (!feasible) continue;
 
         const float delta = (fixed_cost[j_close] - fixed_cost[j_open]) + delta_supply;
@@ -101,26 +101,28 @@ SolutionMSCFLPCI* LocalSearchSwapW::solve(const SolutionMSCFLPCI* current_soluti
     }
 
     if (improved) {
-      const short        j_open         = warehouse_assigned[best_j1];
+      const short        j_open           = warehouse_assigned[best_j1];
       short              j_close_residual = capacity[best_j_close];
       std::vector<short> j_close_assigned;
       std::vector<short> stores_for_j_close;
 
       for (short store : assignment[best_j1]) {
         const short i      = store - 1;
-        const short amount = static_cast<short>(good_supplied[i][best_j1] * good[i]);
+        const short amount = static_cast<short>(good_supplied[i][best_j1] * good[i]); // amount supplied by `j1`
 
-        if (j_close_residual >= amount && AlgorithmTools::verifyCompatibility(incompatible_pairs, store, j_close_assigned)) {
-          j_close_residual -= amount;
-          j_close_assigned.push_back(store);
-          stores_for_j_close.push_back(store);
-          good_supplied[i][best_j1] = static_cast<float>(amount) / good[i];
-          continue;
+        if (j_close_residual >= amount) {
+          if (AlgorithmTools::verifyCompatibility(incompatible_pairs, store, j_close_assigned)) {
+            j_close_residual -= amount;
+            j_close_assigned.push_back(store);
+            stores_for_j_close.push_back(store);
+            good_supplied[i][best_j1] = static_cast<float>(amount) / good[i];
+          }
         }
 
         for (short j2 = 0; j2 < num_assigned; ++j2) {
           if (j2 == best_j1) continue;
-          if (residual_capacity[j2] >= amount && AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j2])) {
+          if (residual_capacity[j2] >= amount) {
+            if (!AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j2])) continue;
             good_supplied[i][j2]      += good_supplied[i][best_j1];
             good_supplied[i][best_j1]  = 0.0f;
             residual_capacity[j2]     -= amount;
