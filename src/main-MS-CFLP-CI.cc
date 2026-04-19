@@ -23,6 +23,8 @@
 #include "../include/table6.h"
 #include "../include/table7.h"
 #include "../include/table8.h"
+#include "../include/table9.h"
+#include "../include/table10.h"
 #include "../include/timer.h"
 
 #include <iostream>
@@ -38,11 +40,12 @@ and how to assign stores.\
 \n    [-h|--help]                             ~ Help\
 \n    [-v|--version]                          ~ Version\n";
 
-const char* VERSION = "MS-CFLP-CI Solver Version 1.1.0\n";
+const char* VERSION = "MS-CFLP-CI Solver Version 1.2.0\n";
 
 void solveMSCFLPCI(const char*, const char&, const char&);
 void printInstanceMSCFLPCI(const Instance*);
 void printSolutionMSCFLPCI(const Solution*);
+void printResultsMSCFLPCI(const char*, const Solution*);
 
 int main(int argc, char* argv[]) {
   try {
@@ -94,13 +97,13 @@ int main(int argc, char* argv[]) {
 void solveMSCFLPCI(const char* input_file, const char& mode, const char& options) {
   const LoaderMSCFLPCI* loader = new LoaderMSCFLPCI();
   Instance* instance = loader->load(input_file);
-  printInstanceMSCFLPCI(instance);
+  //printInstanceMSCFLPCI(instance);
   const Algorithm* algorithm = nullptr;
   const LocalSearch* local_search = nullptr;
 
 
   const short SLACK_FOR_COMPATIBILITY = 5;
-  const short GRASP_ITERATIONS = 50;
+  const short GRASP_ITERATIONS = 30;
   const short RCL_SIZE = 3;
 
 
@@ -122,7 +125,8 @@ void solveMSCFLPCI(const char* input_file, const char& mode, const char& options
   Solution* solution = instance->solve();
   timer->end();
   solution->setTime(timer->elapsed());
-  printSolutionMSCFLPCI(solution);
+  //printSolutionMSCFLPCI(solution);
+  printResultsMSCFLPCI(input_file, solution);
 
   delete loader;
   delete instance;
@@ -158,3 +162,17 @@ void printSolutionMSCFLPCI(const Solution* solution) {
   table->displayOnConsole();
   delete table;  
 }
+
+void printResultsMSCFLPCI(const char* input_file, const Solution* solution) {
+  std::cout << "\n - - - - - - - - - - \n\n";
+
+  Table* table = new Table9(input_file, solution);
+  table->displayOnConsole();
+  table = new Table10(input_file, solution);
+  table->displayOnConsole();
+  delete table;
+}
+
+// TODO: 
+// test new construct phase of GRASP
+// test delta

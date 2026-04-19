@@ -108,7 +108,12 @@ Tabla 9: Resultados
 | Total (T)             | T = Tf + Tt |
 | Time (seconds)        | ...         |
 
-> Tabla 9: Resultados
+> Tabla 9: Resultados según enunciado
 
 |----------------|---------------------|---------------------|----------------|
 | wlp 1 .. 20    | clientes **m**      | instalaciones **n** | resultados ... |
+
+> Tabla 10: Resultados según informe
+
+|----------------|------------------------|--------------------|--------------------|--------------------|--------------------|--------------------|
+| wlp 1 .. 20    | instalaciones abiertas | costo fijo         | costo transporte   | costo total        | incompatibilidades | tiempo CPU         |

@@ -13,6 +13,9 @@
 #include "algorithm.tools.h"
 #include "local-search.h"
 
+#include <cmath>
+#include <stdexcept>
+
 class LocalSearchSwapS : public LocalSearch {
  public:
   ~LocalSearchSwapS() override = default;

@@ -23,10 +23,7 @@ void Table8::displayOnConsole() const {
             << BOLD
             << std::setw(20) << "Objective Value:"
             << std::setw(14) << solution->getObjectiveValue() << "\n"
-            << std::setw(20) << "Execution time:"
+            << std::setw(20) << "Execution Time:"
             << std::setw(14) << std::setprecision(9) << solution->getTime() / 1000000000 << " seconds\n"
             << "\n\n" << RESET;
 }
-
-// Representar porcentaje de desviación: solución óptima inicial - solución óptima final / solución óptima final
-// Comprobar que el delta coincide con el valor objetivo final

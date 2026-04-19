@@ -9,5 +9,5 @@ void Timer::end() {
 }
 
 double Timer::elapsed() const {
-  return std::chrono::duration<double, std::nano>(end_time_ - begin_time_).count();
+  return std::chrono::duration<double>(end_time_ - begin_time_).count();
 }

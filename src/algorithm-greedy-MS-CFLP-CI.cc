@@ -29,18 +29,20 @@ Solution* AlgorithmGreedyMSCFLPCI::solve(const Instance* instance) const {
   short i = 0;
   for (; i < num_warehouses && capacity_sum < goods_sum; ++i) {
     // 6
-    // if (capacity_sum < goods_sum)
+    // if (capacity_sum < goods_sum)       ^^^
     // 7
-    warehouse_assigned.push_back(sorted_fixed_cost_indices[i]);
+    short w = sorted_fixed_cost_indices[i];
+    warehouse_assigned.push_back(w);
     // 8
-    capacity_sum += capacity[sorted_fixed_cost_indices[i]];
+    capacity_sum += capacity[w];
   }
-  // 9
-  std::vector<short> extra_warehouses;
+  // 9 & 10
+  // std::vector<short> extra_warehouses;
   for (short j = i; j < i + slack_ && j < num_warehouses; ++j)
-    extra_warehouses.push_back(sorted_fixed_cost_indices[j]);
+    // extra_warehouses.push_back(sorted_fixed_cost_indices[j]);
+    warehouse_assigned.push_back(sorted_fixed_cost_indices[j]);
   // 10
-  for (short e : extra_warehouses) warehouse_assigned.push_back(e);
+  // for (short e : extra_warehouses) warehouse_assigned.push_back(e);
 
   // Phase 2: Store assignment
   const short& num_stores = instance_MSCFLPCI->getNumStores();
@@ -55,24 +57,27 @@ Solution* AlgorithmGreedyMSCFLPCI::solve(const Instance* instance) const {
   // 12
   std::vector<std::vector<short>> assignment(num_assigned);
   // 13
-  std::vector<std::vector<float>> good_supplied(num_stores, std::vector<float>(num_assigned, 0.0));
+  std::vector<std::vector<float>> good_supplied(num_stores, std::vector<float>(num_assigned, 0.0f));
   // 14
+  std::vector<short> sorted_supply_cost_indices;
+  sorted_supply_cost_indices.reserve(num_assigned);
   for(short i = 0; i < num_stores; ++i) {
     // 15
-    std::vector<short> sorted_supply_cost_indices = AlgorithmTools::sortSupplyCostAscending(warehouse_assigned, num_assigned, supply_cost[i]);
+    sorted_supply_cost_indices = AlgorithmTools::sortSupplyCostAscending(warehouse_assigned, num_assigned, supply_cost[i]);
+    // 18
+    short store = i + 1;
     // 16
+    float good_i = static_cast<float>(good[i]);
     short k = 0;
     while (residual_good[i] > 0 && k < num_assigned) {
       // 17
       short j = sorted_supply_cost_indices[k];
-      // 18
-      short store = i + 1;
       if (AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j])) {
         // 19
         short supply_amount = std::min(residual_good[i], residual_capacity[j]);
         if (supply_amount > 0) { 
           // 20
-          good_supplied[i][j] += supply_amount / static_cast<float>(good[i]);
+          good_supplied[i][j] += supply_amount / good_i;
           // 21
           residual_capacity[j] -= supply_amount;
           // 22

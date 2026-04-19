@@ -37,28 +37,29 @@ SolutionMSCFLPCI* LocalSearchShift::solve(const SolutionMSCFLPCI* current_soluti
   std::vector<short>              residual_capacity  = current_solution->getResidualCapacity();
   std::vector<short>              residual_good      = current_solution->getResidualGood();
 
-  bool improved = true;
+  bool improved     = true;
+  float total_delta = 0.0f;
   while (improved) {
     improved = false;
-    
-    float best_delta      = 0.0f;
-    short best_i          = -1;
-    short best_j1         = -1;
-    short best_j2         = -1;
-    short best_amount     = -1;
+
+    float best_delta  = 0.0f;
+    short best_i      = -1;
+    short best_j1     = -1;
+    short best_j2     = -1;
+    short best_amount = -1;
 
     for (short i = 0; i < num_stores; ++i) {
       const short store = i + 1;
       for (short j1 = 0; j1 < num_assigned; ++j1) {
         if (std::find(assignment[j1].begin(), assignment[j1].end(), store) == assignment[j1].end()) continue; 
-        const short amount = static_cast<short>(good_supplied[i][j1] * good[i]); // amount supplied by `j1`
+        const short amount = static_cast<short>(std::round(good_supplied[i][j1] * good[i])); // amount supplied by `j1`
+        if (amount == 0) continue;
         for (short j2 = 0; j2 < num_assigned; ++j2) {
           if (j1 == j2) continue;
           if (residual_capacity[j2] == 0) continue;
           if (!AlgorithmTools::verifyCompatibility(incompatible_pairs, store, assignment[j2])) continue;
-
           const short transferred = std::min(amount, residual_capacity[j2]);
-          const float delta = (supply_cost[i][warehouse_assigned[j2]] - supply_cost[i][warehouse_assigned[j1]]) * transferred;
+          const float delta       = (supply_cost[i][warehouse_assigned[j2]] - supply_cost[i][warehouse_assigned[j1]]) * transferred;
           if (delta < best_delta) {
             improved    = true;
             best_delta  = delta;
@@ -72,9 +73,10 @@ SolutionMSCFLPCI* LocalSearchShift::solve(const SolutionMSCFLPCI* current_soluti
     }
 
     if (improved) {
-      const short store        = best_i + 1;
-      const short full_amount  = static_cast<short>(good_supplied[best_i][best_j1] * good[best_i]); // amount supplied by `j1`
-      const float fraction     = static_cast<float>(best_amount) / good[best_i];
+      total_delta            += best_delta;
+      const short store       = best_i + 1;
+      const short full_amount = static_cast<short>(std::round(good_supplied[best_i][best_j1] * good[best_i])); // amount supplied by `j1`
+      const float fraction    = static_cast<float>(best_amount) / good[best_i];
 
       if (best_amount == full_amount) {
         // Full shift: remove store from j1
@@ -94,7 +96,7 @@ SolutionMSCFLPCI* LocalSearchShift::solve(const SolutionMSCFLPCI* current_soluti
     }
   }
 
-  return new SolutionMSCFLPCI(
+  SolutionMSCFLPCI* solution = new SolutionMSCFLPCI(
     instance,
     std::move(warehouse_assigned),
     std::move(assignment),
@@ -102,4 +104,7 @@ SolutionMSCFLPCI* LocalSearchShift::solve(const SolutionMSCFLPCI* current_soluti
     std::move(residual_capacity),
     std::move(residual_good)
   );
+  float epsilon = static_cast<float>(current_solution->getObjectiveValue() + total_delta - solution->getObjectiveValue());
+  if (epsilon > 1e-3f) throw std::runtime_error("There is no coincidence between deltas. LocalSearchShift::solve");
+  return solution;
 }

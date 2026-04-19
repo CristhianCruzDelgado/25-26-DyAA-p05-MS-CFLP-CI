@@ -13,6 +13,7 @@
 #include "algorithm.h"
 #include "algorithm.tools.h"
 
+#include <iostream>
 #include <stdexcept>
 #include <random>
 #include <vector>
@@ -38,7 +39,6 @@ class AlgorithmGraspMSCFLPCI : public Algorithm {
   short slack_;
 
   SolutionMSCFLPCI* construct(const InstanceMSCFLPCI*) const;
-  float objective_value_construct_solution_;
   const LocalSearch* local_search_;
 };
 

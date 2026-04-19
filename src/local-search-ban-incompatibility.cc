@@ -38,7 +38,8 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
   std::vector<short>              residual_capacity  = current_solution->getResidualCapacity();
   std::vector<short>              residual_good      = current_solution->getResidualGood();
 
-  bool improved = true;
+  bool improved     = true;
+  float total_delta = 0.0f;
   while (improved) {
     improved = false;
 
@@ -101,7 +102,8 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
       }
     }
 
-    if (best_j2 != -1) {
+    if (improved) {
+      total_delta                     += best_delta;
       auto it = std::find(assignment[worst_j].begin(), assignment[worst_j].end(), block_store);
       assignment[worst_j].erase(it);
       assignment[best_j2].push_back(block_store);
@@ -112,7 +114,7 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
     }
   }
 
-  return new SolutionMSCFLPCI(
+  SolutionMSCFLPCI* solution = new SolutionMSCFLPCI(
     instance,
     std::move(warehouse_assigned),
     std::move(assignment),
@@ -120,4 +122,7 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
     std::move(residual_capacity),
     std::move(residual_good)
   );
+  float epsilon = static_cast<float>(current_solution->getObjectiveValue() + total_delta - solution->getObjectiveValue());
+  if (epsilon > 1e-3f) throw std::runtime_error("There is no coincidence between deltas. LocalSearchBanIncompatibility::solve");  
+  return solution;
 }

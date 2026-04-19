@@ -13,6 +13,9 @@
 #include "algorithm.tools.h"
 #include "local-search.h"
 
+#include <cmath>
+#include <stdexcept>
+
 class LocalSearchBanIncompatibility : public LocalSearch {
  public:
   ~LocalSearchBanIncompatibility() override = default;
