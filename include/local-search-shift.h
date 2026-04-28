@@ -15,6 +15,7 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <vector>
 
 class LocalSearchShift : public LocalSearch {
  public:

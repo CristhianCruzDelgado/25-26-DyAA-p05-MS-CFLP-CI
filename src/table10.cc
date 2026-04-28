@@ -11,10 +11,11 @@ Table10::Table10(
  
 void Table10::displayOnConsole() const {
   std::cout << "Table 10: report results\n";
+  if (solution_ == nullptr) throw std::invalid_argument("Solution not set. Table10::displayOnConsole");
   const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table10::displayOnConsole");
   std::string filename = std::filesystem::path(input_file_).filename().string();
-  std::cout << BOLD << "\n"
+  std::cout << BOLD << std::setprecision(2) << "\n"
             << std::setw(12) << "wlpXX.dzn"
             << std::setw(20) << "Open Warehouses"
             << std::setw(20) << "Fixed Costs Sum"
@@ -28,7 +29,7 @@ void Table10::displayOnConsole() const {
             << std::setw(20) << solution->getFixedCostsSum()
             << std::setw(20) << solution->getSupplyCostsSum()
             << std::setw(20) << solution->getObjectiveValue()
-            << std::setw(20) << solution->getInstanceData()->getNumIncompatibilities()
+            << std::setw(17) << "0/" <<  solution->getInstanceData()->getNumIncompatibilities()
             << std::setw(20) << solution->getTime()
             << "\n\n";
 }

@@ -26,6 +26,9 @@ class SolutionMSCFLPCI : public Solution {
     const std::vector<short>&, 
     const std::vector<short>&
   );
+  SolutionMSCFLPCI(
+    const SolutionMSCFLPCI&
+  );
   ~SolutionMSCFLPCI() override = default;
   void setTime(double) override;
   float objectiveFunction() const override;
@@ -55,6 +58,7 @@ class SolutionMSCFLPCI : public Solution {
   float supply_costs_sum_;
   float objective_value_;
 
+  void build();
   float fixedCostSumFunction() const;
   float supplyCostSumFunction() const;
 };

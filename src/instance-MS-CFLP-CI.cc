@@ -15,10 +15,6 @@ InstanceMSCFLPCI::InstanceMSCFLPCI(
   incompatible_pairs_(incompatible_pairs),
   algorithm_(nullptr) {}
 
-InstanceMSCFLPCI::~InstanceMSCFLPCI() {
-  delete algorithm_;
-}
-
 void InstanceMSCFLPCI::setAlgorithm(const Algorithm* algorithm) {
   if (algorithm == nullptr) throw std::runtime_error("Algorithm cannot be null. InstanceMSCFLPCI::setAlgorithm");
   algorithm_ = algorithm;
@@ -55,7 +51,7 @@ const std::vector<std::vector<short>>& InstanceMSCFLPCI::getSupplyCost() const {
 }
 
 const short InstanceMSCFLPCI::getNumIncompatibilities() const {
-  return static_cast<short>(incompatible_pairs_.size());
+  return static_cast<short>(incompatible_pairs_.size()) / 2;
 }
 
 const std::vector<ShortPair>& InstanceMSCFLPCI::getIncompatiblePairs() const {

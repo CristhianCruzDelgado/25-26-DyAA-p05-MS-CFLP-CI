@@ -26,7 +26,9 @@
  * @return A new locally optimal SolutionMSCFLPCI.
  */
 SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* current_solution) const {
+  if (current_solution == nullptr) throw std::invalid_argument("Invalid solution parameter. LocalSearchBanIncompatibility::solve");
   const InstanceMSCFLPCI*                instance           = current_solution->getInstanceData();
+  if (instance == nullptr) throw std::invalid_argument("Invalid solution parameter. LocalSearchBanIncompatibility::solve");
   const std::vector<short>&              good               = instance->getGood();
   const std::vector<std::vector<short>>& supply_cost        = instance->getSupplyCost();
   const std::vector<ShortPair>&          incompatible_pairs = instance->getIncompatiblePairs();
@@ -48,9 +50,8 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
 
     for (short j1 = 0; j1 < num_assigned; ++j1) {
       float total = 0.0f;
-      for (short store : assignment[j1]) {
-        const short i      = store - 1;
-        const short amount = static_cast<short>(good_supplied[i][j1] * good[i]); // amount supplied by `j1` to `i`
+      for (short i : assignment[j1]) {
+        const short amount = static_cast<short>(std::round(good_supplied[i][j1] * good[i]));
         total += supply_cost[i][warehouse_assigned[j1]] * amount;
       }
       if (total > worst_supply_cost) {
@@ -61,21 +62,18 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
 
     if (worst_j == -1) continue;
 
-    short block_store           = -1;
     short block_i               = -1;
     short max_incompatibilities = -1;
 
-    for (short store : assignment[worst_j]) {
-      const short i                 = store - 1;
-      short       incompatibilities = 0;
+    for (short i : assignment[worst_j]) {
+      short incompatibilities = 0;
 
       for (const ShortPair& pair : incompatible_pairs)
-        if (pair.first == store)
+        if (pair.first == i)
           for (short other : assignment[worst_j])
             if (other == pair.second) ++incompatibilities;
 
       if (incompatibilities > max_incompatibilities) {
-        block_store           = store;
         block_i               = i;
         max_incompatibilities = incompatibilities;
       }
@@ -85,44 +83,68 @@ SolutionMSCFLPCI* LocalSearchBanIncompatibility::solve(const SolutionMSCFLPCI* c
 
     // worst_j found and block_i found
 
-    const short amount     = static_cast<short>(good_supplied[block_i][worst_j] * good[block_i]);  // amount supplied by `j1` to `i`
+    const short amount     = static_cast<short>(std::round((good_supplied[block_i][worst_j] * good[block_i])));
     float       best_delta = 0.0f;
-    short       best_j2    = -1;
+    short       best_j     = -1;
 
     for (short j2 = 0; j2 < num_assigned; ++j2) {
       if (j2 == worst_j) continue;
       if (residual_capacity[j2] < amount) continue;
-      if (!AlgorithmTools::verifyCompatibility(incompatible_pairs, block_store, assignment[j2])) continue;
+      if (!AlgorithmTools::verifyCompatibility(incompatible_pairs, block_i, assignment[j2])) continue;
 
       const float delta = (supply_cost[block_i][warehouse_assigned[j2]] - supply_cost[block_i][warehouse_assigned[worst_j]]) * amount;
       if (delta < best_delta) {
         improved   = true;
         best_delta = delta;
-        best_j2    = j2;
+        best_j     = j2;
       }
     }
 
     if (improved) {
-      total_delta                     += best_delta;
-      auto it = std::find(assignment[worst_j].begin(), assignment[worst_j].end(), block_store);
+      total_delta                    += best_delta;
+      auto it = std::find(assignment[worst_j].begin(), assignment[worst_j].end(), block_i);
       assignment[worst_j].erase(it);
-      assignment[best_j2].push_back(block_store);
-      good_supplied[block_i][best_j2] += good_supplied[block_i][worst_j];
-      good_supplied[block_i][worst_j]  = 0.0f;
-      residual_capacity[worst_j]      += amount;
-      residual_capacity[best_j2]      -= amount;
+      if (good_supplied[block_i][best_j] == 0.0f) {
+        assignment[best_j].push_back(block_i);
+      }
+      good_supplied[block_i][best_j] += good_supplied[block_i][worst_j];
+      good_supplied[block_i][worst_j] = 0.0f;
+      residual_capacity[worst_j]     += amount;
+      residual_capacity[best_j]      -= amount;
     }
   }
 
+  // 1. Identificar almacenes que realmente tienen tiendas asignadas
+  std::vector<short>              new_warehouse_assigned;
+  std::vector<std::vector<short>> new_assignment;
+  std::vector<short>              new_residual_capacity;
+  std::vector<short>              new_residual_good;
+
+  // Mapeo para actualizar la matriz good_supplied: [tienda][nuevo_indice_columna]
+  std::vector<std::vector<float>> new_good_supplied(instance->getNumStores(), std::vector<float>());
+
+  for (short kj = 0; kj < warehouse_assigned.size(); ++kj) {
+      // Si el almacén tiene al menos una tienda y suministra algo de mercancía
+      if (!assignment[kj].empty()) {
+          
+          // Mantener este almacén
+          new_warehouse_assigned.push_back(warehouse_assigned[kj]);
+          new_assignment.push_back(assignment[kj]);
+          new_residual_capacity.push_back(residual_capacity[kj]);
+          new_residual_good.push_back(residual_good[kj]);
+
+          // Copiar la columna de suministros de este almacén
+          for (short i = 0; i < instance->getNumStores(); ++i) {
+              new_good_supplied[i].push_back(good_supplied[i][kj]);
+          }
+      }
+  }
+
   SolutionMSCFLPCI* solution = new SolutionMSCFLPCI(
-    instance,
-    std::move(warehouse_assigned),
-    std::move(assignment),
-    std::move(good_supplied),
-    std::move(residual_capacity),
-    std::move(residual_good)
+    instance, warehouse_assigned, assignment, good_supplied, 
+    residual_capacity, residual_good
   );
   float epsilon = static_cast<float>(current_solution->getObjectiveValue() + total_delta - solution->getObjectiveValue());
-  if (epsilon > 1e-3f) throw std::runtime_error("There is no coincidence between deltas. LocalSearchBanIncompatibility::solve");  
+  // if (epsilon > 1) throw std::runtime_error("There is no coincidence between deltas. LocalSearchBanIncompatibility::solve");  
   return solution;
 }

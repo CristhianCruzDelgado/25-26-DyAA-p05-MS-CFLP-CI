@@ -7,29 +7,23 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef TABLE7_H_
-#define TABLE7_H_
+#ifndef LOCAL_SEARCH_VND_H_
+#define LOCAL_SEARCH_VND_H_
 
-#include "table.h"
+#include "local-search.h"
 
-#include <iomanip>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 
-#define RESET   "\033[0m"
-#define BOLD    "\033[1m"
-
-class Solution;
-
-class Table7 : public Table {
+class LocalSearchVnd : public LocalSearch {
  public:
-  Table7(const Solution*);
-  ~Table7() override = default;
-  void displayOnConsole() const override;
-
+  LocalSearchVnd();
+  ~LocalSearchVnd() override;
+  SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const override;
+  
  private:
-  const Solution* solution_;
+  std::vector<LocalSearch*> local_searchs_;
 };
 
 #endif

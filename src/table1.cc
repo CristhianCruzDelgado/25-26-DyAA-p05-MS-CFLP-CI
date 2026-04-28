@@ -8,6 +8,7 @@ Table1::Table1(
 
 void Table1::displayOnConsole() const {
   std::cout << "Table 1: Instance Data\n";
+  if (instance_ == nullptr) throw std::invalid_argument("Instance not set. Table1::displayOnConsole");
   const InstanceMSCFLPCI* instance = dynamic_cast<const InstanceMSCFLPCI*>(instance_);
   if (instance == nullptr) throw std::invalid_argument("Invalid instance type. Table1::displayOnConsole");
   short num_warehouses = instance->getNumWarehouses();
@@ -38,7 +39,7 @@ void Table1::displayOnConsole() const {
               << std::setw(8) << good[i]
               << std::setw(3) << " ";
     for (short p = 0; p < num_incompatibilities; ++p)
-      if (incompatible_pairs[p].first == (i + 1))
+      if (incompatible_pairs[p].first == i)
         std::cout << incompatible_pairs[p].second << " ";
     std::cout << "\n";
   }

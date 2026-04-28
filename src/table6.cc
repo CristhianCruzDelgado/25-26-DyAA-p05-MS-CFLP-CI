@@ -9,6 +9,7 @@ Table6::Table6(
 
 void Table6::displayOnConsole() const {
   std::cout << "Table 6: Verify Restrictions\n";
+  if (solution_ == nullptr) throw std::invalid_argument("Solution not set. Table6::displayOnConsole");
   const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table6::displayOnConsole");
   const InstanceMSCFLPCI* instance = solution->getInstanceData();
@@ -30,14 +31,21 @@ void Table6::displayOnConsole() const {
   for (short j = 0; j < num_assigned; ++j) {
     std::cout << std::setw(6) << warehouse_assigned[j] + 1
               << std::setw(14) << capacity[warehouse_assigned[j]] - residual_capacity[j]
-              << std::setw(9) << capacity[warehouse_assigned[j]]
-              << std::setw(11) << (residual_capacity[j] == 0 ? "✓Limit" : "✓OK") << "\n";
+              << std::setw(9) << capacity[warehouse_assigned[j]];
+    if (residual_capacity[j] < 0) {
+      std::cout << std::setw(12) << "✗OVER\n";
+    } else if (residual_capacity[j] == 0) {
+      std::cout << std::setw(12) << "✓Limit\n";
+    } else {
+      std::cout << std::setw(12) << "✓OK\n";
+    }
   }
   std::cout << BOLD << "\nIncompatibility Pairs:\n"
             << std::setw(14) << "First-Store"
             << std::setw(14) << "Second-Store"
             << std::setw(12) << "State"
             << "\n" << RESET;
+  bool incompatibility = false;
   for (short p = 0; p < num_incompatibilities; ++p) {
     short s1 = incompatible_pairs[p].first;
     short s2 = incompatible_pairs[p].second;
@@ -51,10 +59,14 @@ void Table6::displayOnConsole() const {
       if (has_s1 && has_s2) { violation = true; break; }
     }
     if (violation) {
-      std::cout << std::setw(14) << s1
-                << std::setw(14) << s2
+      incompatibility = true;
+      std::cout << std::setw(14) << s1 + 1
+                << std::setw(14) << s2 + 1
                 << std::setw(9) << "✗Violation\n";
     }
+  }
+  if (!incompatibility) {
+    std::cout << std::setw(37) << "✓ All pairs are compatible\n";
   }
   std::cout << "\n";
 }

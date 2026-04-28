@@ -7,34 +7,32 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef ALGORITHM_GRASP_MS_CFLP_CI_H_
-#define ALGORITHM_GRASP_MS_CFLP_CI_H_
+#ifndef ALGORITHM_GVNS_MS_CFLP_CI_H_
+#define ALGORITHM_GVNS_MS_CFLP_CI_H_
 
 #include "algorithm.h"
-#include "algorithm.tools.h"
 
-#include <iostream>
-#include <stdexcept>
-#include <random>
-#include <vector>
-
-class InstanceMSCFLPCI;
-class SolutionMSCFLPCI;
+class Algorithm;
 class LocalSearch;
+class Shaking;
 
-class AlgorithmGraspMSCFLPCI : public Algorithm {
+class AlgorithmGvnsMSCFLPCI : public Algorithm {
  public:
-  AlgorithmGraspMSCFLPCI(
-    const short&, 
+  AlgorithmGvnsMSCFLPCI(
+    const short&,
+    const short&,
     const Algorithm*,
+    const Shaking*,
     const LocalSearch*
   );
-  ~AlgorithmGraspMSCFLPCI() override;
+  ~AlgorithmGvnsMSCFLPCI() override;
   Solution* solve(const Instance*) const override;
   
  private:
-  short grasp_iterations_;
-  const Algorithm* solution_constructor_;
+  short shaking_max_distance_;
+  short gvns_iterations_;
+  const Algorithm* initial_solution_constructor_;
+  const Shaking* shaking_;
   const LocalSearch* local_search_;
 };
 

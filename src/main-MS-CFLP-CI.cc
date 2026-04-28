@@ -7,45 +7,34 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#include "../include/algorithm-GRASP-MS-CFLP-CI.h"
-#include "../include/algorithm-greedy-MS-CFLP-CI.h"
+#include "../include/algorithm.h"
+#include "../include/algorithms-constructor.h"
 #include "../include/instance.h"
 #include "../include/loader-MS-CFLP-CI.h"
-#include "../include/local-search-ban-incompatibility.h"
-#include "../include/local-search-shift.h"
-#include "../include/local-search-swap-s.h"
-#include "../include/local-search-swap-w.h"
 #include "../include/solution.h"
-#include "../include/table1.h"
-#include "../include/table2.h"
-#include "../include/table4.h"
-#include "../include/table5.h"
-#include "../include/table6.h"
-#include "../include/table7.h"
-#include "../include/table8.h"
-#include "../include/table9.h"
-#include "../include/table10.h"
 #include "../include/timer.h"
+#include "../include/tools.h"
 
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
-const char* HELP_MESSAGE = "\nHelp: This program decide which warehouses to open\
+const char* HELP_MESSAGE = "\nHelp: This program decide which warehouses to open \
 and how to assign stores.\
 \nTry:\
 \n./MS-CFLP-CI-solver\
 \n    [../Instances_MS-CFLP-CI/wlp[1..20].dzn ~ Run\
-\n        [--greedy|--grasp [--shift|--swap-s|--swap-w|--ban-incompatibility]]]\
+\n        [--greedy|--grasp [--shift|--swap-s|--swap-w|--incompatibility]|--gvns [--vnd|--rvnd|--rl]]]\
 \n    [-h|--help]                             ~ Help\
 \n    [-v|--version]                          ~ Version\n";
 
 const char* VERSION = "MS-CFLP-CI Solver Version 1.2.0\n";
 
-void solveMSCFLPCI(const char*, const char&, const char&);
-void printInstanceMSCFLPCI(const Instance*);
-void printSolutionMSCFLPCI(const Solution*);
-void printResultsMSCFLPCI(const char*, const Solution*);
+void solveMSCFLPCI(
+  const char*, 
+  const char&, 
+  const char&
+);
 
 int main(int argc, char* argv[]) {
   try {
@@ -73,8 +62,18 @@ int main(int argc, char* argv[]) {
           solveMSCFLPCI(argv[1], '2', '2');
         } else if (std::string(argv[3]) == "--swap-w") {
           solveMSCFLPCI(argv[1], '2', '3');
-        } else if (std::string(argv[3]) == "--ban-incompatibility") {
+        } else if (std::string(argv[3]) == "--incompatibility") {
           solveMSCFLPCI(argv[1], '2', '4');
+        } else {
+          throw std::invalid_argument("Invalid algorithm option argument");
+        }
+      } else if (std::string(argv[2]) == "--gvns") {
+        if (std::string(argv[3]) == "--vnd") {
+          solveMSCFLPCI(argv[1], '3', '1');
+        } else if (std::string(argv[3]) == "--rvnd") {
+          solveMSCFLPCI(argv[1], '3', '2');
+        } else if (std::string(argv[3]) == "--rl") {
+          solveMSCFLPCI(argv[1], '3', '3');
         } else {
           throw std::invalid_argument("Invalid algorithm option argument");
         }
@@ -94,85 +93,31 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-void solveMSCFLPCI(const char* input_file, const char& mode, const char& options) {
-  const LoaderMSCFLPCI* loader = new LoaderMSCFLPCI();
-  Instance* instance = loader->load(input_file);
+void solveMSCFLPCI(
+  const char* input_filename,
+  const char& mode, 
+  const char& option
+) {
+  /* Instance */
+  const LoaderMSCFLPCI loader;
+  Instance* instance = loader.load(input_filename);
   //printInstanceMSCFLPCI(instance);
-  const Algorithm* algorithm = nullptr;
-  const LocalSearch* local_search = nullptr;
 
-
-  const short SLACK_FOR_COMPATIBILITY = 5;
-  const short GRASP_ITERATIONS = 30;
-  const short RCL_SIZE = 3;
-
-
-  switch (mode) {
-    case '1': { algorithm = new AlgorithmGreedyMSCFLPCI(SLACK_FOR_COMPATIBILITY); break; }
-    case '2': {
-      switch (options) {
-        case '1': local_search = new LocalSearchShift(); break;
-        case '2': local_search = new LocalSearchSwapS(); break;
-        case '3': local_search = new LocalSearchSwapW(); break;
-        case '4': local_search = new LocalSearchBanIncompatibility(); break;
-      }
-      algorithm = new AlgorithmGraspMSCFLPCI(GRASP_ITERATIONS, RCL_SIZE, SLACK_FOR_COMPATIBILITY, local_search); break;
-    }
-  }
+  /* Algorithm */
+  const AlgorithmsConstructor algorithms_constructor(mode, option);
+  const Algorithm* algorithm = algorithms_constructor.createAlgorithm();
   instance->setAlgorithm(algorithm);
-  Timer* timer = new Timer();
-  timer->begin();
-  Solution* solution = instance->solve();
-  timer->end();
-  solution->setTime(timer->elapsed());
-  //printSolutionMSCFLPCI(solution);
-  printResultsMSCFLPCI(input_file, solution);
 
-  delete loader;
+  /* Solution */
+  Timer timer;
+  timer.begin();
+  Solution* solution = instance->solve();
+  timer.end();
+  solution->setTime(timer.elapsed());
+  printSolutionMSCFLPCI(solution);
+  printResultsMSCFLPCI(input_filename, solution);
+
   delete instance;
-  delete timer;
+  delete algorithm;
   delete solution;
 }
-
-void printInstanceMSCFLPCI(const Instance* instance) {
-  Table* table = new Table1(instance);
-  table->displayOnConsole();
-  table = new Table2(instance);
-  table->displayOnConsole();
-  // TODO: add #include "../include/table3.h"
-  // table = new Table3(instance);
-  // table->displayOnConsole();
-  delete table;
-
-  std::cout << "\n\n - - - - - - - - - - \n";
-}
-
-void printSolutionMSCFLPCI(const Solution* solution) {
-  std::cout << "\n - - - - - - - - - - \n\n";
-
-  Table* table = new Table4(solution);
-  table->displayOnConsole();
-  table = new Table5(solution);
-  table->displayOnConsole();
-  table = new Table6(solution);
-  table->displayOnConsole();
-  table = new Table7(solution);
-  table->displayOnConsole();
-  table = new Table8(solution);
-  table->displayOnConsole();
-  delete table;  
-}
-
-void printResultsMSCFLPCI(const char* input_file, const Solution* solution) {
-  std::cout << "\n - - - - - - - - - - \n\n";
-
-  Table* table = new Table9(input_file, solution);
-  table->displayOnConsole();
-  table = new Table10(input_file, solution);
-  table->displayOnConsole();
-  delete table;
-}
-
-// TODO: 
-// test new construct phase of GRASP
-// test delta

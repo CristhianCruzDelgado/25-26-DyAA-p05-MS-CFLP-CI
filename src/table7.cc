@@ -9,6 +9,7 @@ Table7::Table7(
  
 void Table7::displayOnConsole() const {
   std::cout << "Table 7: Supply Costs\n";
+  if (solution_ == nullptr) throw std::invalid_argument("Solution not set. Table7::displayOnConsole");
   const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table7::displayOnConsole");
   const InstanceMSCFLPCI* instance = solution->getInstanceData();

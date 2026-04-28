@@ -7,17 +7,22 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef INSTANCE_H_
-#define INSTANCE_H_
+#ifndef ALGORITHM_CONSTRUCTOR_H_
+#define ALGORITHM_CONSTRUCTOR_H_
 
 class Algorithm;
-class Solution;
 
-class Instance {
+class AlgorithmsConstructor {
  public:
-  virtual ~Instance() = default;
-  virtual void setAlgorithm(const Algorithm*) = 0;
-  virtual Solution* solve() const = 0;
+  AlgorithmsConstructor(
+    const char&,
+    const char&
+  );
+  const Algorithm* createAlgorithm() const;
+
+ private:
+  char mode_;
+  char option_;
 };
 
 #endif

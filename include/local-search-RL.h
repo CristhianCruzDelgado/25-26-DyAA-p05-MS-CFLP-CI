@@ -7,19 +7,31 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef LOCAL_SEARCH_BAN_INCOMPATIBILITY_H_
-#define LOCAL_SEARCH_BAN_INCOMPATIBILITY_H_
+#ifndef LOCAL_SEARCH_RL_H_
+#define LOCAL_SEARCH_RL_H_
 
-#include "algorithm.tools.h"
 #include "local-search.h"
 
-#include <cmath>
+#include <random>
 #include <stdexcept>
+#include <vector>
 
-class LocalSearchBanIncompatibility : public LocalSearch {
+class LocalSearchRl : public LocalSearch {
  public:
-  ~LocalSearchBanIncompatibility() override = default;
+  LocalSearchRl(
+    const float&,
+    const float&,
+    const short&
+  );
+  ~LocalSearchRl() override;
   SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const override;
+  
+ private:
+  std::vector<LocalSearch*> local_searchs_;
+
+  float epsilon_;
+  float learning_rate_;
+  short iterations_;
 };
 
 #endif

@@ -1,103 +1,107 @@
-#include "../include/algorithm-greedy-MS-CFLP-CI.h"
+#include "../include/algorithm-random-greedy-MS-CFLP-CI.h"
 #include "../include/instance-MS-CFLP-CI.h"
 #include "../include/solution-MS-CFLP-CI.h"
+#include "../include/local-search.h"
 
-AlgorithmGreedyMSCFLPCI::AlgorithmGreedyMSCFLPCI(
-  const short& slack
-) : 
-  slack_(slack) {}
+AlgorithmRandomGreedyMSCFLPCI::AlgorithmRandomGreedyMSCFLPCI(
+  const short& slack,
+  const short& rcl_size
+) :
+  slack_(slack),
+  rcl_size_(rcl_size) {}
 
-Solution* AlgorithmGreedyMSCFLPCI::solve(const Instance* instance) const {
-  if (instance == nullptr) throw std::invalid_argument("Invalid instance parameter. AlgorithmGvnsMSCFLPCI::solve");
+Solution* AlgorithmRandomGreedyMSCFLPCI::solve(const Instance* instance) const {
+  if (instance == nullptr) throw std::invalid_argument("Invalid instance parameter. AlgorithmRandomGreedyMSCFLPCI::solve");
   const InstanceMSCFLPCI* instance_MSCFLPCI = dynamic_cast<const InstanceMSCFLPCI*>(instance);
-  if (instance_MSCFLPCI == nullptr) throw std::invalid_argument("Invalid instance type. AlgorithmGreedyMSCFLPCI::solve");
+  if (instance_MSCFLPCI == nullptr) throw std::invalid_argument("Invalid instance type. AlgorithmRandomGreedyMSCFLPCI::solve");
+  std::random_device rd;
+  std::mt19937 gen(rd());
 
   // Phase 1: Warehouse selection
   const short& num_warehouses = instance_MSCFLPCI->getNumWarehouses();
   const std::vector<short>& fixed_cost = instance_MSCFLPCI->getFixedCost();
   const std::vector<short>& good = instance_MSCFLPCI->getGood();
   const std::vector<short>& capacity = instance_MSCFLPCI->getCapacity();
-  // 1
+
+  // 1 - 4
   std::vector<short> sorted_fixed_cost_indices = AlgorithmTools::sortFixedCostAscending(fixed_cost, num_warehouses); 
-  // 2
   short goods_sum = 0;
   for (short g : good) goods_sum += g;
-  // 3
   short capacity_sum = 0;
-  // 4
   std::vector<short> warehouse_assigned;
-  // 5
-  short it1 = 0;
-  for (; it1 < num_warehouses && capacity_sum < goods_sum; ++it1) {
-    // 6
-    // if (capacity_sum < goods_sum)       ^^^
-    // 7
-    short j = sorted_fixed_cost_indices[it1];
+
+  std::vector<short> rcl;
+  rcl.reserve(slack_);
+
+  // 5 - 8
+  for (short it1 = 0; it1 < num_warehouses && capacity_sum < goods_sum; ++it1) {
+    rcl.clear();
+    short rcl_size = std::min(rcl_size_, static_cast<short>(sorted_fixed_cost_indices.size()));
+    for (short it2 = 0; it2 < rcl_size; ++it2) {
+      short j = sorted_fixed_cost_indices[it2];
+      rcl.push_back(j);
+    }
+    std::uniform_int_distribution<short> dist(0, rcl.size() - 1);
+    short pos = dist(gen);
+    short j = rcl[pos];
     warehouse_assigned.push_back(j);
-    // 8
     capacity_sum += capacity[j];
+    sorted_fixed_cost_indices.erase(sorted_fixed_cost_indices.begin() + pos);
   }
-  // 9 & 10
-  // std::vector<short> extra_warehouses;
-  for (short it2 = it1; it2 < it1 + slack_ && it2 < num_warehouses; ++it2) {
-    // extra_warehouses.push_back(sorted_fixed_cost_indices[it2]);
-    short j = sorted_fixed_cost_indices[it2];
+
+  // 9 - 10
+  for (short it3 = 0; it3 < slack_; ++it3) {
+    short j = sorted_fixed_cost_indices[it3];
     warehouse_assigned.push_back(j);
   }
-  // 10
-  // for (short e : extra_warehouses) warehouse_assigned.push_back(e);
 
   // Phase 2: Store assignment
   const short& num_stores = instance_MSCFLPCI->getNumStores();
   const short num_assigned = static_cast<short>(warehouse_assigned.size());
   const std::vector<std::vector<short>>& supply_cost = instance_MSCFLPCI->getSupplyCost();
   const std::vector<ShortPair>& incompatible_pairs = instance_MSCFLPCI->getIncompatiblePairs();
-  // 11
+
+  // 11 -13
   std::vector<short> residual_good = good;
   std::vector<short> residual_capacity(num_assigned);
   for (short j = 0; j < num_assigned; ++j)
     residual_capacity[j] = capacity[warehouse_assigned[j]];
-  // 12
   std::vector<std::vector<short>> assignment(num_assigned);
-  // 13
   std::vector<std::vector<float>> good_supplied(num_stores, std::vector<float>(num_assigned, 0.0f));
-  // 14
+
+  // 14 - 23
   std::vector<short> sorted_supply_cost_indices;
   sorted_supply_cost_indices.reserve(num_assigned);
   for(short i = 0; i < num_stores; ++i) {
-    // 15
     sorted_supply_cost_indices = AlgorithmTools::sortSupplyCostAscending(warehouse_assigned, num_assigned, supply_cost[i]);
-    // 16
     float good_i = static_cast<float>(good[i]);
-    short it3 = 0;
-    while (residual_good[i] > 0 && it3 < num_assigned) {
-      // 17
-      short j = sorted_supply_cost_indices[it3];
+    while (residual_good[i] > 0 && !sorted_supply_cost_indices.empty()) {
+      rcl.clear();
+      short rcl_size = std::min(rcl_size_, static_cast<short>(sorted_supply_cost_indices.size()));
+      for (short it4 = 0; it4 < rcl_size; ++it4) {
+        short j = sorted_supply_cost_indices[it4];
+        rcl.push_back(j);
+      }
+      std::uniform_int_distribution<short> dist(0, rcl.size() - 1);
+      short pos = dist(gen);
+      short j = rcl[pos];
       if (AlgorithmTools::verifyCompatibility(incompatible_pairs, i, assignment[j])) {
-        // 19
         short supply_amount = std::min(residual_good[i], residual_capacity[j]);
         if (supply_amount > 0) { 
-          // 20
           good_supplied[i][j] += supply_amount / good_i;
-          // 21
           residual_capacity[j] -= supply_amount;
-          // 22
           residual_good[i] -= supply_amount;
-          // 23 
           assignment[j].push_back(i);
+        } 
+        if (residual_capacity[j] == 0) {
+          sorted_supply_cost_indices.erase(sorted_supply_cost_indices.begin() + pos);
         }
+      } else {
+        sorted_supply_cost_indices.erase(sorted_supply_cost_indices.begin() + pos);
       }
-      ++it3;
     }
   }
 
-  // 24
-  // float fixed_cost_sum = calculateFixedCostSum();
-  // 25
-  // float supply_cost_t_sum = calculateSupplyCostSum();
-  // 26
-  // float total_cost = calculateTotalCost();
-  // 27
   SolutionMSCFLPCI* solution = new SolutionMSCFLPCI(
     instance_MSCFLPCI, warehouse_assigned, assignment, good_supplied, 
     residual_capacity, residual_good

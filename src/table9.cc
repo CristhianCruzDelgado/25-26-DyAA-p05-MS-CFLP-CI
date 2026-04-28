@@ -11,6 +11,7 @@ Table9::Table9(
  
 void Table9::displayOnConsole() const {
   std::cout << "Table 9: statement results\n";
+  if (solution_ == nullptr) throw std::invalid_argument("Solution not set. Table9::displayOnConsole");
   const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table9::displayOnConsole");
   std::string filename = std::filesystem::path(input_file_).filename().string();
@@ -23,6 +24,6 @@ void Table9::displayOnConsole() const {
             << std::setw(12) << filename
             << std::setw(11) << solution->getInstanceData()->getNumStores()
             << std::setw(13) << solution->getInstanceData()->getNumWarehouses()
-            << std::setw(20) << solution->getObjectiveValue()
+            << std::setw(20) << std::setprecision(2) << solution->getObjectiveValue()
             << "\n\n";
 }

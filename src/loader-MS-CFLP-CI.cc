@@ -17,7 +17,7 @@ Instance* LoaderMSCFLPCI::load(const char* path) const {
   short warehouses = -1, stores = -1;
   std::vector<short> capacity, fixed_cost, goods;
   std::vector<std::vector<short>> supply_cost;
-  int incompatibilities = -1;
+  short incompatibilities = -1;
   std::vector<ShortPair> incompatible_pairs;
   
   std::string buffer;
@@ -104,7 +104,7 @@ std::vector<std::vector<short>> LoaderMSCFLPCI::loadMatrix(std::ifstream& file, 
   std::vector<std::vector<short>> matrix;
   matrix.reserve(rows);
   std::string currentLine = firstLine;
-  for (int row = 0; row < rows; ++row) {
+  for (short row = 0; row < rows; ++row) {
     if (row > 0) {
       if (!getline(file, currentLine))
         throw std::runtime_error("Unexpected EOF while reading matrix row " + std::to_string(row));
@@ -152,7 +152,7 @@ int LoaderMSCFLPCI::readInt(const std::string& value) const {
   return number;
 }
 
-std::vector<ShortPair> LoaderMSCFLPCI::readVectorPairsShort(const std::string& value, int size) const {
+std::vector<ShortPair> LoaderMSCFLPCI::readVectorPairsShort(const std::string& value, short size) const {
   if (size <= 0) 
     throw std::runtime_error("Invalid size for pairs vector: " + std::to_string(size));
   std::string cleaned = trim(value);
@@ -186,10 +186,10 @@ std::vector<ShortPair> LoaderMSCFLPCI::readVectorPairsShort(const std::string& v
       throw std::runtime_error("Value exceeds short range: " + std::to_string(first));
     if (second > std::numeric_limits<short>::max()) 
       throw std::runtime_error("Value exceeds short range: " + std::to_string(second));
-    pairs.push_back({ static_cast<short>(first), static_cast<short>(second) });
-    pairs.push_back({ static_cast<short>(second), static_cast<short>(first) });
+    pairs.push_back({ static_cast<short>(first - 1), static_cast<short>(second - 1) });
+    pairs.push_back({ static_cast<short>(second - 1), static_cast<short>(first - 1) });
   }
-  if (static_cast<int>(pairs.size()) != (2 * size)) 
+  if (static_cast<short>(pairs.size()) != (2 * size)) 
     throw std::runtime_error("Expected " + std::to_string(size) + " pairs, got " + std::to_string(pairs.size()));
   return pairs;
 }

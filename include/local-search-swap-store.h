@@ -7,18 +7,19 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef LOCAL_SEARCH_SWAP_W_H_
-#define LOCAL_SEARCH_SWAP_W_H_
+#ifndef LOCAL_SEARCH_SWAP_S_H_
+#define LOCAL_SEARCH_SWAP_S_H_
 
 #include "algorithm.tools.h"
 #include "local-search.h"
 
 #include <cmath>
 #include <stdexcept>
+#include <vector>
 
-class LocalSearchSwapW : public LocalSearch {
+class LocalSearchSwapS : public LocalSearch {
  public:
-  ~LocalSearchSwapW() override = default;
+  ~LocalSearchSwapS() override = default;
   SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const override;
 };
 

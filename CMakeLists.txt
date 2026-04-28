@@ -4,6 +4,9 @@ project(DyAA-P5-Algoritmos-Aproximados)
 
 file(GLOB_RECURSE SOURCES src/*.cc)
 
+add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+add_link_options(-fsanitize=address)
+
 add_executable(MS-CFLP-CI-solver ${SOURCES})
 
 target_include_directories(MS-CFLP-CI-solver PRIVATE include)

@@ -35,7 +35,7 @@ class LoaderMSCFLPCI : public Loader {
   std::vector<short> readVectorShort(const std::string&, short) const;
   std::vector<std::vector<short>> loadMatrix(std::ifstream&, const std::string&, short, short) const;
   int readInt(const std::string&) const;
-  std::vector<ShortPair> readVectorPairsShort(const std::string&, int) const;
+  std::vector<ShortPair> readVectorPairsShort(const std::string&, short) const;
 };
 
 #endif

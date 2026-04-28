@@ -7,18 +7,19 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef LOCAL_SEARCH_BAN_INCOMPATIBILITY_H_
-#define LOCAL_SEARCH_BAN_INCOMPATIBILITY_H_
+#ifndef LOCAL_SEARCH_SWAP_W_H_
+#define LOCAL_SEARCH_SWAP_W_H_
 
 #include "algorithm.tools.h"
 #include "local-search.h"
 
 #include <cmath>
 #include <stdexcept>
+#include <vector>
 
-class LocalSearchBanIncompatibility : public LocalSearch {
+class LocalSearchSwapW : public LocalSearch {
  public:
-  ~LocalSearchBanIncompatibility() override = default;
+  ~LocalSearchSwapW() override = default;
   SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const override;
 };
 

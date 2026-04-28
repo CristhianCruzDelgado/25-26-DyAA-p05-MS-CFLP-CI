@@ -24,7 +24,7 @@ class InstanceMSCFLPCI : public Instance {
     const std::vector<short>&, 
     const std::vector<std::vector<short>>&, 
     const std::vector<ShortPair>&);
-  ~InstanceMSCFLPCI() override;
+  ~InstanceMSCFLPCI() override = default;
 
   void setAlgorithm(const Algorithm*) override;
   Solution* solve() const override;

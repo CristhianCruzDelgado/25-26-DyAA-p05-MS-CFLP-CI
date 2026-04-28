@@ -7,13 +7,15 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef TABLE_H_
-#define TABLE_H_
+#ifndef SHAKING_H_
+#define SHAKING_H_
 
-class Table {
+class SolutionMSCFLPCI;
+
+class Shaking {
  public:
-  virtual ~Table() = default;
-  virtual void displayOnConsole() const = 0;
+  virtual ~Shaking() = default;
+  virtual SolutionMSCFLPCI* shake(const SolutionMSCFLPCI*, const short&) const = 0;
 };
 
 #endif

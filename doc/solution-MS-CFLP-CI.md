@@ -10,7 +10,7 @@ The goal of the MS-CFLP-CI is to minimize the total cost, which includes both th
 |----------------------|-----------------------|-----------------------------------------------------------------------------------------------|
 | instance_data_       | InstanceMS_CFLP_CI*   | Pointer to the problem instance containing all input data                                     |
 | warehouses_assigned_ | vector<short>         | Indices of warehouses selected to be open in the solution                                     |
-| assignments_         | vector<vector<short>> | Binary matrix where assignments_[i][j] = 1 if store i is assigned to warehouse j              |
+| assignments_         | vector<vector<short>> | Matrix where assignments_[i][j] = x exist if store i is assigned to warehouse j               |
 | good_supplied_       | vector<vector<float>> | Matrix where good_supplied_[i][j] is the fraction of goods of store i supplied by warehouse j |
 | residual_capacity_   | vector<short>         | Remaining capacity of each warehouse after assigning goods                                    |
 | residual_goods_      | vector<short>         | Remaining unsatisfied demand of each store                                                    |

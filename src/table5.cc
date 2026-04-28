@@ -9,6 +9,7 @@ Table5::Table5(
 
 void Table5::displayOnConsole() const {
   std::cout << "Table 5: Assignment Data\n";
+  if (solution_ == nullptr) throw std::invalid_argument("Solution not set. Table5::displayOnConsole");
   const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table5::displayOnConsole");
   const InstanceMSCFLPCI* instance = solution->getInstanceData();

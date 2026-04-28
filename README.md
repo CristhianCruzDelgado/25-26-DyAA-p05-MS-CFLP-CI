@@ -23,7 +23,8 @@ See `./Instances_MS-CFLP-CI`. **Check if its need to unzip some instance**. Prob
 ## Available algortihms
 
 > Greedy
-> GRASP (phase 1: construction, phase 2: local search) Local search movements: [shift, swap stores, swap warehouses and ban incompatibilities]
+> GRASP (phase 1: construction, phase 2: local search) Local search movements: [shift, swap stores, swap warehouses and ban incompatibility]
+> GVNS (phase 1: shaking, phase 2: local search) Local search movements: [VND, RVND, RL]
 
 
 ## Solution description

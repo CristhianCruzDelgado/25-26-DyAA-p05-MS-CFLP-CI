@@ -7,19 +7,24 @@
  * Email: alu0101648293@ull.edu.es
  */
 
-#ifndef LOCAL_SEARCH_SWAP_S_H_
-#define LOCAL_SEARCH_SWAP_S_H_
+#ifndef LOCAL_SEARCH_RVND_H_
+#define LOCAL_SEARCH_RVND_H_
 
-#include "algorithm.tools.h"
 #include "local-search.h"
 
-#include <cmath>
+#include <iostream>
+#include <random>
 #include <stdexcept>
+#include <vector>
 
-class LocalSearchSwapS : public LocalSearch {
+class LocalSearchRvnd : public LocalSearch {
  public:
-  ~LocalSearchSwapS() override = default;
+  LocalSearchRvnd();
+  ~LocalSearchRvnd() override;
   SolutionMSCFLPCI* solve(const SolutionMSCFLPCI*) const override;
+  
+ private:
+  std::vector<LocalSearch*> local_searchs_;
 };
 
 #endif
