@@ -51,6 +51,10 @@ int main(int argc, char* argv[]) {
     } else if (argc == 3) {
       if (std::string(argv[2]) == "--greedy") {
         solveMSCFLPCI(argv[1], '1', '0');
+      } else if (std::string(argv[2]) == "--mod1") {
+        solveMSCFLPCI(argv[1], '4', '0');
+      } else if (std::string(argv[2]) == "--mod2") {
+        solveMSCFLPCI(argv[1], '5', '0');
       } else {
         throw std::invalid_argument("Invalid algorithm argument");
       }
@@ -114,7 +118,7 @@ void solveMSCFLPCI(
   Solution* solution = instance->solve();
   timer.end();
   solution->setTime(timer.elapsed());
-  printSolutionMSCFLPCI(solution);
+  //printSolutionMSCFLPCI(solution);
   printResultsMSCFLPCI(input_filename, solution);
 
   delete instance;

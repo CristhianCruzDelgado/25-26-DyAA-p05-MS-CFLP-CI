@@ -11,6 +11,9 @@
 #include "../include/local-search-swap-warehouse.h"
 #include "../include/local-search-VND.h"
 #include "../include/shaking-shift.h"
+#include "../include/mod2.h"
+
+#include <iostream>
 
 AlgorithmsConstructor::AlgorithmsConstructor(
   const char& mode,
@@ -22,8 +25,8 @@ AlgorithmsConstructor::AlgorithmsConstructor(
 const Algorithm* AlgorithmsConstructor::createAlgorithm() const {
   const short SLACK_FOR_COMPATIBILITY = 5;
   const short RCL_SIZE = 3;
-  const short GRASP_ITERATIONS = 300;
-  const short SHAKING_MAX_DISTANCE = 30;
+  const short GRASP_ITERATIONS = 10;
+  const short SHAKING_MAX_DISTANCE = 10;
   const short GVNS_ITERATIONS = 4; 
   const float EPSILON_RL = 0.15f;
   const float LEARNING_RATE = 0.3f;
@@ -55,6 +58,18 @@ const Algorithm* AlgorithmsConstructor::createAlgorithm() const {
       case '3': local_search = new LocalSearchRl(EPSILON_RL, LEARNING_RATE, RL_ITERATIONS); break;
     }
     return new AlgorithmGvnsMSCFLPCI(SHAKING_MAX_DISTANCE, GVNS_ITERATIONS, random_greedy, shaking, local_search);
+  }
+
+  if (mode_ == '4') {
+    return new AlgorithmRandomGreedyMSCFLPCI(SLACK_FOR_COMPATIBILITY, RCL_SIZE);
+  }
+
+  if (mode_ == '5') {
+    std::cout << "A";
+    const Algorithm* grasp = new AlgorithmGraspMSCFLPCI(GRASP_ITERATIONS, new AlgorithmRandomGreedyMSCFLPCI(SLACK_FOR_COMPATIBILITY, RCL_SIZE), new LocalSearchSwapS());
+    const Shaking* shaking = new ShakingShift();
+    const LocalSearch* local_search = new LocalSearchRvndMod();
+    return new AlgorithmGvnsMSCFLPCI(SHAKING_MAX_DISTANCE, GVNS_ITERATIONS, grasp, shaking, local_search);
   }
 
   return nullptr;

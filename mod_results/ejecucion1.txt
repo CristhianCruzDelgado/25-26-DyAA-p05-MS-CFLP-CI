@@ -1,0 +1,29 @@
+40726->37559. Improved: 8.43207%
+GRASP iteration 1/10 completed.
+GRASP iteration 2/10 completed.
+GRASP iteration 3/10 completed.
+GRASP iteration 4/10 completed.
+GRASP iteration 5/10 completed.
+GRASP iteration 6/10 completed.
+GRASP iteration 7/10 completed.
+GRASP iteration 8/10 completed.
+GRASP iteration 9/10 completed.
+GRASP iteration 10/10 completed.
+GRASP completed.
+GVNS iteration 1/4 completed.
+34550->34314. Improved: 0.683068%
+34314->34151. Improved: 0.475025%
+34151->34035. Improved: 0.339668%
+GVNS iteration 2/4 completed.
+GVNS iteration 3/4 completed.
+GVNS iteration 4/4 completed.
+GVNS completed.
+Table 9: statement results
+
+   wlpXX.dzn     Stores   Warehouses     Objective Value
+   wlp01.dzn        115           50            34035.00
+
+Table 10: report results
+
+   wlpXX.dzn     Open Warehouses     Fixed Costs Sum    Supply Costs Sum     Objective Value   Incompatibilities      Execution Time
+   wlp01.dzn                  35            18550.00            15485.00            34035.00               0/383               39.14

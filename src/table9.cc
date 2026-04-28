@@ -15,7 +15,7 @@ void Table9::displayOnConsole() const {
   const SolutionMSCFLPCI* solution = dynamic_cast<const SolutionMSCFLPCI*>(solution_);
   if (solution == nullptr) throw std::invalid_argument("Invalid solution type. Table9::displayOnConsole");
   std::string filename = std::filesystem::path(input_file_).filename().string();
-  std::cout << BOLD << "\n"
+  std::cout << BOLD << std::fixed << std::setprecision(2) << "\n"
             << std::setw(12) << "wlpXX.dzn"
             << std::setw(11) << "Stores"
             << std::setw(13) << "Warehouses"
